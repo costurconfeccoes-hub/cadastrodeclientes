@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Clientes - Costur Confecções</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --primary-light: #6ba8e9;
+            --primary-dark: #3a7bc8;
+            --secondary: #87ceeb;
+            --accent: #5dade2;
+            --light: #f0f8ff;
+            --dark: #2c3e50;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --gray: #7f8c8d;
+            --light-gray: #ecf0f1;
+            --border-radius: 10px;
+            --shadow: 0 8px 16px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .container {
+            width: 100%;
+            background: white;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--light-gray);
+            position: relative;
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
+        }
+        
+        .logo i {
+            font-size: 36px;
+            color: white;
+        }
+        
+        .header h1 {
+            color: var(--dark);
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            color: var(--gray);
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .form-section {
+            margin-bottom: 25px;
+            background: var(--light);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: var(--transition);
+        }
+        
+        .form-section:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+        }
+        
+        .form-section h2 {
+            font-size: 18px;
+            color: var(--primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+        
+        .form-section h2 i {
+            color: var(--primary-dark);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .form-group label i {
+            color: var(--primary);
+            font-size: 16px;
+        }
+        
+        .form-group input, 
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--light-gray);
+            border-radius: 8px;
+            font-size: 15px;
+            transition: var(--transition);
+            background: white;
+        }
+        
+        .form-group input:focus, 
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+            outline: none;
+        }
+        
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        
+        .form-group-small {
+            flex: 1;
+        }
+        
+        .form-group-medium {
+            flex: 2;
+        }
+        
+        .form-group-large {
+            flex: 3;
+        }
+        
+        .full-width {
+            width: 100%;
+        }
+        
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            gap: 15px;
+        }
+        
+        button {
+            padding: 14px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: var(--transition);
+        }
+        
+        .btn-save {
+            background: linear-gradient(to right, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 10px rgba(74, 144, 226, 0.3);
+            flex: 1;
+        }
+        
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(74, 144, 226, 0.4);
+        }
+        
+        .btn-baixa {
+            background: linear-gradient(to right, var(--warning), #e67e22);
+            color: white;
+            box-shadow: 0 4px 10px rgba(243, 156, 18, 0.3);
+            flex: 1;
+        }
+        
+        .btn-baixa:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(243, 156, 18, 0.4);
+        }
+        
+        .btn-pdf {
+            background: linear-gradient(to right, var(--danger), #c0392b);
+            color: white;
+            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+            flex: 1;
+        }
+        
+        .btn-pdf:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(231, 76, 60, 0.4);
+        }
+        
+        .btn-history {
+            background: linear-gradient(to right, var(--success), #27ae60);
+            color: white;
+            box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
+            flex: 1;
+        }
+        
+        .btn-history:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(46, 204, 113, 0.4);
+        }
+        
+        .history-section {
+            margin-top: 30px;
+        }
+        
+        .history-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .history-header h2 {
+            color: var(--primary);
+            font-size: 22px;
+        }
+        
+        .history-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .history-controls button {
+            padding: 10px 15px;
+            font-size: 14px;
+        }
+        
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        
+        .history-table th {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .history-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .history-table tr:hover {
+            background: var(--light);
+        }
+        
+        .status-baixada {
+            background: var(--danger);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-ativo {
+            background: var(--success);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .action-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 5px;
+            transition: var(--transition);
+        }
+        
+        .btn-pdf-small {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-pdf-small:hover {
+            background: #c0392b;
+        }
+        
+        .btn-baixa-small {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .btn-baixa-small:hover {
+            background: #e67e22;
+        }
+        
+        .btn-excluir-small {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-excluir-small:hover {
+            background: #c0392b;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(150%);
+            transition: transform 0.4s ease;
+            z-index: 1000;
+            border-left: 4px solid var(--success);
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification i {
+            font-size: 20px;
+            color: var(--success);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            width: 90%;
+            max-width: 500px;
+        }
+        
+        .modal h3 {
+            margin-bottom: 20px;
+            color: var(--dark);
+            text-align: center;
+        }
+        
+        .modal-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 2px solid var(--light-gray);
+            border-radius: 8px;
+            font-size: 15px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .modal-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .modal-confirm {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .modal-cancel {
+            background: var(--light-gray);
+            color: var(--dark);
+        }
+        
+        /* Estilização para campos obrigatórios */
+        .required::after {
+            content: " *";
+            color: var(--danger);
+        }
+        
+        /* Efeito de loading nos botões */
+        .loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        
+        .loading::after {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-select {
+            padding: 10px 15px;
+            border: 2px solid var(--light-gray);
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+            min-width: 150px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="container">
+            <div class="header">
+                <div class="logo">
+                    <i class="fas fa-tshirt"></i>
+                </div>
+                <h1>Costur Confecções</h1>
+                <p>Cadastro de Clientes</p>
+            </div>
+            
+            <form id="clientForm">
+                <div class="form-section">
+                    <h2><i class="fas fa-user"></i> Dados Pessoais</h2>
+                    
+                    <div class="form-group">
+                        <label for="nome" class="required"><i class="fas fa-signature"></i> Nome Completo</label>
+                        <input type="text" id="nome" name="nome" required placeholder="Digite o nome completo">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group form-group-medium">
+                            <label for="marca"><i class="fas fa-tag"></i> Marca</label>
+                            <input type="text" id="marca" name="marca" placeholder="Marca preferida">
+                        </div>
+                        
+                        <div class="form-group form-group-medium">
+                            <label for="dataNascimento"><i class="fas fa-birthday-cake"></i> Data de Nascimento</label>
+                            <input type="date" id="dataNascimento" name="dataNascimento">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group form-group-medium">
+                            <label for="dataCadastro" class="required"><i class="fas fa-calendar-alt"></i> Data de Cadastro</label>
+                            <input type="date" id="dataCadastro" name="dataCadastro" required>
+                        </div>
+                        
+                        <div class="form-group form-group-medium">
+                            <label for="telefone" class="required"><i class="fas fa-phone"></i> Número de Contato</label>
+                            <input type="tel" id="telefone" name="telefone" required placeholder="(00) 00000-0000">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h2><i class="fas fa-map-marker-alt"></i> Endereço</h2>
+                    
+                    <div class="form-row">
+                        <div class="form-group form-group-large">
+                            <label for="rua" class="required"><i class="fas fa-road"></i> Rua</label>
+                            <input type="text" id="rua" name="rua" required placeholder="Nome da rua">
+                        </div>
+                        
+                        <div class="form-group form-group-small">
+                            <label for="numero" class="required"><i class="fas fa-hashtag"></i> Número</label>
+                            <input type="text" id="numero" name="numero" required placeholder="Nº">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group form-group-medium">
+                            <label for="bairro" class="required"><i class="fas fa-map"></i> Bairro</label>
+                            <input type="text" id="bairro" name="bairro" required placeholder="Nome do bairro">
+                        </div>
+                        
+                        <div class="form-group form-group-medium">
+                            <label for="cidade" class="required"><i class="fas fa-city"></i> Cidade</label>
+                            <input type="text" id="cidade" name="cidade" required placeholder="Nome da cidade">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group form-group-medium">
+                            <label for="estado" class="required"><i class="fas fa-flag"></i> Estado</label>
+                            <select id="estado" name="estado" required>
+                                <option value="">Selecione</option>
+                                <option value="AC">Acre</option>
+                                <option value="AL">Alagoas</option>
+                                <option value="AP">Amapá</option>
+                                <option value="AM">Amazonas</option>
+                                <option value="BA">Bahia</option>
+                                <option value="CE">Ceará</option>
+                                <option value="DF">Distrito Federal</option>
+                                <option value="ES">Espírito Santo</option>
+                                <option value="GO">Goiás</option>
+                                <option value="MA">Maranhão</option>
+                                <option value="MT">Mato Grosso</option>
+                                <option value="MS">Mato Grosso do Sul</option>
+                                <option value="MG">Minas Gerais</option>
+                                <option value="PA">Pará</option>
+                                <option value="PB">Paraíba</option>
+                                <option value="PR">Paraná</option>
+                                <option value="PE">Pernambuco</option>
+                                <option value="PI">Piauí</option>
+                                <option value="RJ">Rio de Janeiro</option>
+                                <option value="RN">Rio Grande do Norte</option>
+                                <option value="RS">Rio Grande do Sul</option>
+                                <option value="RO">Rondônia</option>
+                                <option value="RR">Roraima</option>
+                                <option value="SC">Santa Catarina</option>
+                                <option value="SP">São Paulo</option>
+                                <option value="SE">Sergipe</option>
+                                <option value="TO">Tocantins</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group form-group-medium">
+                            <label for="cep" class="required"><i class="fas fa-mail-bulk"></i> CEP</label>
+                            <input type="text" id="cep" name="cep" required placeholder="00000-000">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h2><i class="fas fa-sticky-note"></i> Observações</h2>
+                    
+                    <div class="form-group">
+                        <textarea id="observacoes" name="observacoes" placeholder="Informações adicionais sobre o cliente..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="buttons">
+                    <button type="button" class="btn-pdf" id="btn-pdf">
+                        <i class="fas fa-file-pdf"></i> Baixar PDF
+                    </button>
+                    <button type="button" class="btn-history" id="btn-history">
+                        <i class="fas fa-history"></i> Ver Histórico
+                    </button>
+                    <button type="button" class="btn-baixa" id="btn-baixa">
+                        <i class="fas fa-file-export"></i> Dar Baixa
+                    </button>
+                    <button type="submit" class="btn-save">
+                        <i class="fas fa-save"></i> Salvar Cadastro
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="container history-section hidden" id="history-section">
+            <div class="history-header">
+                <h2><i class="fas fa-history"></i> Histórico de Cadastros</h2>
+                <div class="history-controls">
+                    <button type="button" class="btn-pdf" id="btn-export-all">
+                        <i class="fas fa-file-export"></i> Exportar Tudo
+                    </button>
+                    <button type="button" class="btn-baixa" id="btn-back-form">
+                        <i class="fas fa-arrow-left"></i> Voltar ao Formulário
+                    </button>
+                </div>
+            </div>
+            
+            <div class="filters">
+                <select class="filter-select" id="filter-status">
+                    <option value="todos">Todos os Status</option>
+                    <option value="ativo">Ativo</option>
+                    <option value="baixada">Baixada</option>
+                </select>
+                
+                <select class="filter-select" id="filter-order">
+                    <option value="recentes">Mais Recentes</option>
+                    <option value="antigos">Mais Antigos</option>
+                    <option value="nome">Ordenar por Nome</option>
+                </select>
+            </div>
+            
+            <div class="table-container">
+                <table class="history-table" id="history-table">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Telefone</th>
+                            <th>Data Cadastro</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table-body">
+                        <!-- Os dados serão preenchidos via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para senha de baixa -->
+    <div class="modal" id="modal-baixa">
+        <div class="modal-content">
+            <h3>Autorização de Baixa</h3>
+            <p>Digite a senha de administrador para dar baixa no cliente:</p>
+            <input type="password" id="senha-baixa" class="modal-input" placeholder="Senha de administrador">
+            <div class="modal-buttons">
+                <button class="modal-btn modal-cancel" id="cancelar-baixa">Cancelar</button>
+                <button class="modal-btn modal-confirm" id="confirmar-baixa">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notification-text">Operação realizada com sucesso!</span>
+    </div>
+
+    <script>
+        // Definir a data atual como padrão para o campo de data de cadastro
+        document.getElementById('dataCadastro').valueAsDate = new Date();
+        
+        // Formatar telefone
+        document.getElementById('telefone').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length <= 10) {
+                value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+            } else {
+                value = value.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+            }
+            e.target.value = value;
+        });
+        
+        // Formatar CEP
+        document.getElementById('cep').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 5) {
+                value = value.replace(/(\d{5})(\d{0,3})/, '$1-$2');
+            }
+            e.target.value = value;
+        });
+        
+        // Função para mostrar notificação
+        function showNotification(message, isSuccess = true) {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notification-text');
+            
+            notificationText.textContent = message;
+            
+            if (!isSuccess) {
+                notification.style.borderLeftColor = 'var(--danger)';
+                notification.querySelector('i').className = 'fas fa-exclamation-circle';
+                notification.querySelector('i').style.color = 'var(--danger)';
+            } else {
+                notification.style.borderLeftColor = 'var(--success)';
+                notification.querySelector('i').className = 'fas fa-check-circle';
+                notification.querySelector('i').style.color = 'var(--success)';
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Modal para dar baixa
+        const modalBaixa = document.getElementById('modal-baixa');
+        const btnBaixa = document.getElementById('btn-baixa');
+        const cancelarBaixa = document.getElementById('cancelar-baixa');
+        const confirmarBaixa = document.getElementById('confirmar-baixa');
+        const senhaBaixa = document.getElementById('senha-baixa');
+        
+        btnBaixa.addEventListener('click', function() {
+            const nome = document.getElementById('nome').value;
+            
+            if (!nome) {
+                showNotification('Preencha o nome do cliente antes de dar baixa!', false);
+                return;
+            }
+            
+            modalBaixa.style.display = 'flex';
+            senhaBaixa.focus();
+        });
+        
+        cancelarBaixa.addEventListener('click', function() {
+            modalBaixa.style.display = 'none';
+            senhaBaixa.value = '';
+        });
+        
+        confirmarBaixa.addEventListener('click', function() {
+            const senha = senhaBaixa.value;
+            const senhaCorreta = 'ADM2023Costur@';
+            
+            if (senha === senhaCorreta) {
+                modalBaixa.style.display = 'none';
+                senhaBaixa.value = '';
+                
+                // Simular loading
+                const btn = document.querySelector('.btn-baixa');
+                btn.classList.add('loading');
+                
+                setTimeout(() => {
+                    btn.classList.remove('loading');
+                    showNotification('Baixa realizada com sucesso!');
+                    // Aqui você pode adicionar a lógica para dar baixa no cliente
+                }, 1500);
+            } else {
+                showNotification('Senha incorreta!', false);
+                senhaBaixa.focus();
+            }
+        });
+        
+        // Fechar modal ao clicar fora
+        window.addEventListener('click', function(e) {
+            if (e.target === modalBaixa) {
+                modalBaixa.style.display = 'none';
+                senhaBaixa.value = '';
+            }
+        });
+        
+        // Função para formatar data no formato DD/MM/AAAA
+        function formatarData(data) {
+            if (!data) return 'Não informado';
+            
+            const dataObj = new Date(data);
+            if (isNaN(dataObj.getTime())) return 'Data inválida';
+            
+            const dia = String(dataObj.getDate()).padStart(2, '0');
+            const mes = String(dataObj.getMonth() + 1).padStart(2, '0');
+            const ano = dataObj.getFullYear();
+            
+            return `${dia}/${mes}/${ano}`;
+        }
+        
+        // Gerar PDF do formulário atual com design bonito (sem logo)
+        document.getElementById('btn-pdf').addEventListener('click', function() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Cores para o PDF
+            const primaryColor = [74, 144, 226];
+            const secondaryColor = [135, 206, 235];
+            const darkColor = [44, 62, 80];
+            const lightColor = [240, 248, 255];
+            
+            // Cabeçalho com gradiente
+            doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+            doc.rect(0, 0, 210, 35, 'F');
+            
+            // Título
+            doc.setFontSize(20);
+            doc.setTextColor(255, 255, 255);
+            doc.text('COSTUR CONFECÇÕES', 105, 15, { align: 'center' });
+            
+            doc.setFontSize(14);
+            doc.setTextColor(255, 255, 255);
+            doc.text('Cadastro de Cliente', 105, 25, { align: 'center' });
+            
+            // Linha decorativa
+            doc.setDrawColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
+            doc.setLineWidth(2);
+            doc.line(20, 40, 190, 40);
+            
+            let y = 55;
+            
+            // Seção de Dados Pessoais
+            doc.setFontSize(16);
+            doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+            doc.text('DADOS PESSOAIS', 20, y);
+            y += 10;
+            
+            doc.setFontSize(10);
+            doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
+            
+            // Nome
+            doc.setFont(undefined, 'bold');
+            doc.text('Nome Completo:', 20, y);
+            doc.setFont(undefined, 'normal');
+            doc.text(document.getElementById('nome').value || 'Não informado', 60, y);
+            y += 8;
+            
+            // Marca
+            doc.setFont(undefined, 'bold');
+            doc.text('Marca:', 20, y);
+            doc.setFont(undefined, 'normal');
+            doc.text(document.getElementById('marca').value || 'Não informado', 60, y);
+            y += 8;
+            
+            // Data de Nascimento
+            doc.setFont(undefined, 'bold');
+            doc.text('Data de Nascimento:', 20, y);
+            doc.setFont(undefined, 'normal');
+            doc.text(formatarData(document.getElementById('dataNascimento').value), 70, y);
+            y += 8;
+            
+            // Data de Cadastro
+            doc.setFont(undefined, 'bold');
+            doc.text('Data de Cadastro:', 20, y);
+            doc.setFont(undefined, 'normal');
+            doc.text(formatarData(document.getElementById('dataCadastro').value), 70, y);
+            y += 8;
+            
+            // Telefone
+            doc.setFont(undefined, 'bold');
+            doc.text('Telefone:', 20, y);
+            doc.setFont(undefined, 'normal');
+            doc.text(document.getElementById('telefone').value || 'Não informado', 60, y);
+            y += 15;
+            
+            // Seção de Endereço
+            doc.setFontSize(16);
+            doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+            doc.text('ENDEREÇO', 20, y);
+            y += 10;
+            
+            doc.setFontSize(10);
+            doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
+            
+            const endereco = [
+                `Rua: ${document.getElementById('rua').value || 'Não informado'}`,
+                `Número: ${document.getElementById('numero').value || 'Não informado'}`,
+                `Bairro: ${document.getElementById('bairro').value || 'Não informado'}`,
+                `Cidade: ${document.getElementById('cidade').value || 'Não informado'}`,
+                `Estado: ${document.getElementById('estado').value || 'Não informado'}`,
+                `CEP: ${document.getElementById('cep').value || 'Não informado'}`
+            ];
+            
+            endereco.forEach(linha => {
+                doc.text(linha, 25, y);
+                y += 6;
+            });
+            
+            y += 8;
+            
+            // Seção de Observações
+            const observacoes = document.getElementById('observacoes').value;
+            if (observacoes) {
+                doc.setFontSize(16);
+                doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+                doc.text('OBSERVAÇÕES', 20, y);
+                y += 10;
+                
+                doc.setFontSize(10);
+                doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
+                
+                const splitObservacoes = doc.splitTextToSize(observacoes, 170);
+                doc.text(splitObservacoes, 25, y);
+                y += splitObservacoes.length * 4;
+            }
+            
+            // Rodapé
+            const now = new Date();
+            const dataHora = now.toLocaleString('pt-BR');
+            
+            doc.setFontSize(8);
+            doc.setTextColor(150, 150, 150);
+            doc.text(`Documento gerado em: ${dataHora}`, 105, 285, { align: 'center' });
+            
+            // Linha decorativa no rodapé
+            doc.setDrawColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
+            doc.setLineWidth(1);
+            doc.line(20, 275, 190, 275);
+            
+            // Salvar PDF
+            const nomeCliente = document.getElementById('nome').value || 'cliente';
+            doc.save(`cadastro_${nomeCliente.replace(/\s+/g, '_')}.pdf`);
+            
+            showNotification('PDF gerado com sucesso!');
+        });
+        
+        // Salvar no localStorage
+        function salvarNoLocalStorage() {
+            const cliente = {
+                id: Date.now(), // ID único baseado no timestamp
+                nome: document.getElementById('nome').value,
+                marca: document.getElementById('marca').value,
+                dataNascimento: document.getElementById('dataNascimento').value,
+                dataCadastro: document.getElementById('dataCadastro').value,
+                telefone: document.getElementById('telefone').value,
+                rua: document.getElementById('rua').value,
+                numero: document.getElementById('numero').value,
+                bairro: document.getElementById('bairro').value,
+                cidade: document.getElementById('cidade').value,
+                estado: document.getElementById('estado').value,
+                cep: document.getElementById('cep').value,
+                observacoes: document.getElementById('observacoes').value,
+                status: 'Ativo', // Status inicial
+                dataBaixa: null // Data de baixa (quando aplicável)
+            };
+            
+            // Obter clientes existentes ou criar array vazio
+            let clientes = JSON.parse(localStorage.getItem('clientesCostur')) || [];
+            
+            // Adicionar novo cliente
+            clientes.push(cliente);
+            
+            // Salvar no localStorage
+            localStorage.setItem('clientesCostur', JSON.stringify(clientes));
+            
+            return clientes.length;
+        }
+        
+        // Carregar histórico do localStorage
+        function carregarHistorico() {
+            const clientes = JSON.parse(localStorage.getItem('clientesCostur')) || [];
+            const tbody = document.getElementById('history-table-body');
+            const filterStatus = document.getElementById('filter-status').value;
+            const filterOrder = document.getElementById('filter-order').value;
+            
+            // Limpar tabela
+            tbody.innerHTML = '';
+            
+            if (clientes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum cliente cadastrado</td></tr>';
+                return;
+            }
+            
+            // Filtrar clientes
+            let clientesFiltrados = [...clientes];
+            
+            if (filterStatus !== 'todos') {
+                clientesFiltrados = clientesFiltrados.filter(cliente => 
+                    cliente.status.toLowerCase() === filterStatus.toLowerCase()
+                );
+            }
+            
+            // Ordenar clientes
+            if (filterOrder === 'recentes') {
+                clientesFiltrados.sort((a, b) => new Date(b.dataCadastro) - new Date(a.dataCadastro));
+            } else if (filterOrder === 'antigos') {
+                clientesFiltrados.sort((a, b) => new Date(a.dataCadastro) - new Date(b.dataCadastro));
+            } else if (filterOrder === 'nome') {
+                clientesFiltrados.sort((a, b) => a.nome.localeCompare(b.nome));
+            }
+            
+            // Preencher tabela
+            clientesFiltrados.forEach(cliente => {
+                const tr = document.createElement('tr');
+                
+                // Formatar data no formato DD/MM/AAAA
+                const dataCadastro = formatarData(cliente.dataCadastro);
+                
+                tr.innerHTML = `
+                    <td>${cliente.nome}</td>
+                    <td>${cliente.telefone}</td>
+                    <td>${dataCadastro}</td>
+                    <td><span class="${cliente.status === 'Ativo' ? 'status-ativo' : 'status-baixada'}">${cliente.status}</span></td>
+                    <td>
+                        <button class="action-btn btn-pdf-small" onclick="gerarPDFCliente(${cliente.id})">
+                            <i class="fas fa-file-pdf"></i> PDF
+                        </button>
+                        ${cliente.status === 'Ativo' ? 
+                            `<button class="action-btn btn-baixa-small" onclick="darBaixaCliente(${cliente.id})">
+                                <i class="fas fa-file-export"></i> Baixa
+                            </button>` : 
+                            ''
+                        }
+                        <button class="action-btn btn-excluir-small" onclick="excluirCliente(${cliente.id})">
+                            <i class="fas fa-trash"></i> Excluir
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(tr);
+            });
+        }
+        
+        // Gerar PDF para um cliente específico com design bonito (sem logo)
+        function gerarPDFCliente(id) {
+            const clientes = JSON.parse(localStorage.getItem('clientesCostur')) || [];
+            const cliente = clientes.find(c => c.id === id);
+            
+            if (!cliente) {
+                showNotification('Cliente não encontrado!', false);
+                return;
+            }
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Cores para o PDF
+            const primaryColor = [74, 144, 226];
+            const secondaryColor = [135, 206, 235];
+            const darkColor = [44, 62, 80];
+            const successColor = [46, 204, 113];
+            const dangerColor = [231, 76, 60];
+            
+            // Cabeçalho com gradiente
+            doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+            doc.rect(0, 0, 210, 35, 'F');
+            
+            // Título
+            doc.setFontSize(20);
+            doc.setTextColor(255, 255, 255);
+            doc.text('COSTUR CONFECÇÕES', 105, 15, { align: 'center' });
+            
+            doc.setFontSize(14);
+            doc.setTextColor(255, 255, 255);
+            doc.text('Ficha do Cliente', 105, 25, { align: 'center' });
+            
+            // Linha decorativa
+            doc.setDrawColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
+            doc.setLineWidth(2);
+            doc.line(20, 40, 190, 40);
+            
+            let y = 55;
+            
+            // Status do cliente
+            doc.setFontSize(12);
+            if (cliente.status === 'Ativo') {
+                doc.setTextColor(successColor[0], successColor[1], successColor[2]);
+            } else {
+                doc.setTextColor(dangerColor[0], dangerColor[1], dangerColor[2]);
+            }
+            doc.text(`STATUS: ${cliente.status}`, 20, y);
+            y += 10;
+            
+            // Seção de Dados Pessoais
+            doc.setFontSize(16);
+            doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+            doc.text('DADOS PESSOAIS', 20, y);
+            y += 10;
+            
+            doc.setFontSize(10);
+            doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
+            
+            // Nome
+            doc.setFont(undefined, 'bold');
+            doc.text('Nome Completo:', 20, y);
+            doc.setFont(undefined, 'normal');
+            doc.text(cliente.nome || 'Não informado', 60, y);
+            y += 8;
+            
+            // Marca
+            doc.setFont(undefined, 'bold');
+            doc.text('Marca:', 20, y);
+            doc.setFont(undefined, 'normal');
+            doc.text(cliente.marca || 'Não informado', 60, y);
+            y += 8;
+            
+            // Data de Nascimento
+            doc.setFont(undefined, 'bold');
+            doc.text('Data de Nascimento:', 20, y);
+            doc.setFont(undefined, 'normal');
+            doc.text(formatarData(cliente.dataNascimento), 70, y);
+            y += 8;
+            
+            // Data de Cadastro
+            doc.setFont(undefined, 'bold');
+            doc.text('Data de Cadastro:', 20, y);
+            doc.setFont(undefined, 'normal');
+            doc.text(formatarData(cliente.dataCadastro), 70, y);
+            y += 8;
+            
+            // Telefone
+            doc.setFont(undefined, 'bold');
+            doc.text('Telefone:', 20, y);
+            doc.setFont(undefined, 'normal');
+            doc.text(cliente.telefone || 'Não informado', 60, y);
+            y += 15;
+            
+            // Seção de Endereço
+            doc.setFontSize(16);
+            doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+            doc.text('ENDEREÇO', 20, y);
+            y += 10;
+            
+            doc.setFontSize(10);
+            doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
+            
+            const endereco = [
+                `Rua: ${cliente.rua || 'Não informado'}`,
+                `Número: ${cliente.numero || 'Não informado'}`,
+                `Bairro: ${cliente.bairro || 'Não informado'}`,
+                `Cidade: ${cliente.cidade || 'Não informado'}`,
+                `Estado: ${cliente.estado || 'Não informado'}`,
+                `CEP: ${cliente.cep || 'Não informado'}`
+            ];
+            
+            endereco.forEach(linha => {
+                doc.text(linha, 25, y);
+                y += 6;
+            });
+            
+            y += 8;
+            
+            // Seção de Observações
+            if (cliente.observacoes) {
+                doc.setFontSize(16);
+                doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+                doc.text('OBSERVAÇÕES', 20, y);
+                y += 10;
+                
+                doc.setFontSize(10);
+                doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
+                
+                const splitObservacoes = doc.splitTextToSize(cliente.observacoes, 170);
+                doc.text(splitObservacoes, 25, y);
+                y += splitObservacoes.length * 4;
+            }
+            
+            // Data da Baixa (se aplicável)
+            if (cliente.status === 'Baixada' && cliente.dataBaixa) {
+                doc.setFontSize(12);
+                doc.setTextColor(dangerColor[0], dangerColor[1], dangerColor[2]);
+                doc.text(`Data da Baixa: ${formatarData(cliente.dataBaixa)}`, 20, y + 10);
+            }
+            
+            // Rodapé
+            const now = new Date();
+            const dataHora = now.toLocaleString('pt-BR');
+            
+            doc.setFontSize(8);
+            doc.setTextColor(150, 150, 150);
+            doc.text(`Documento gerado em: ${dataHora}`, 105, 285, { align: 'center' });
+            
+            // Linha decorativa no rodapé
+            doc.setDrawColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
+            doc.setLineWidth(1);
+            doc.line(20, 275, 190, 275);
+            
+            // Salvar PDF
+            doc.save(`ficha_${cliente.nome.replace(/\s+/g, '_')}.pdf`);
+            
+            showNotification('PDF do cliente gerado com sucesso!');
+        }
+        
+        // Dar baixa em um cliente específico
+        function darBaixaCliente(id) {
+            const senha = prompt('Digite a senha de administrador para dar baixa:');
+            
+            if (senha !== 'ADM2023Costur@') {
+                showNotification('Senha incorreta!', false);
+                return;
+            }
+            
+            const clientes = JSON.parse(localStorage.getItem('clientesCostur')) || [];
+            const clienteIndex = clientes.findIndex(c => c.id === id);
+            
+            if (clienteIndex !== -1) {
+                clientes[clienteIndex].status = 'Baixada';
+                clientes[clienteIndex].dataBaixa = new Date().toISOString();
+                
+                localStorage.setItem('clientesCostur', JSON.stringify(clientes));
+                carregarHistorico();
+                
+                showNotification('Baixa realizada com sucesso!');
+            }
+        }
+        
+        // Excluir um cliente
+        function excluirCliente(id) {
+            const senha = prompt('Digite a senha de administrador para excluir o cliente:');
+            
+            if (senha !== 'ADM2023Costur@') {
+                showNotification('Senha incorreta!', false);
+                return;
+            }
+            
+            if (!confirm('Tem certeza que deseja excluir este cliente? Esta ação não pode ser desfeita.')) {
+                return;
+            }
+            
+            const clientes = JSON.parse(localStorage.getItem('clientesCostur')) || [];
+            const clienteIndex = clientes.findIndex(c => c.id === id);
+            
+            if (clienteIndex !== -1) {
+                const clienteNome = clientes[clienteIndex].nome;
+                clientes.splice(clienteIndex, 1);
+                
+                localStorage.setItem('clientesCostur', JSON.stringify(clientes));
+                carregarHistorico();
+                
+                showNotification(`Cliente "${clienteNome}" excluído com sucesso!`);
+            }
+        }
+        
+        // Alternar entre formulário e histórico
+        document.getElementById('btn-history').addEventListener('click', function() {
+            document.getElementById('history-section').classList.remove('hidden');
+            carregarHistorico();
+        });
+        
+        document.getElementById('btn-back-form').addEventListener('click', function() {
+            document.getElementById('history-section').classList.add('hidden');
+        });
+        
+        // Filtros
+        document.getElementById('filter-status').addEventListener('change', carregarHistorico);
+        document.getElementById('filter-order').addEventListener('change', carregarHistorico);
+        
+        // Manipular o envio do formulário
+        document.getElementById('clientForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Validar campos obrigatórios
+            const nome = document.getElementById('nome').value;
+            const dataCadastro = document.getElementById('dataCadastro').value;
+            const telefone = document.getElementById('telefone').value;
+            const rua = document.getElementById('rua').value;
+            const numero = document.getElementById('numero').value;
+            const bairro = document.getElementById('bairro').value;
+            const cidade = document.getElementById('cidade').value;
+            const estado = document.getElementById('estado').value;
+            const cep = document.getElementById('cep').value;
+            
+            if (!nome || !dataCadastro || !telefone || !rua || !numero || !bairro || !cidade || !estado || !cep) {
+                showNotification('Preencha todos os campos obrigatórios!', false);
+                return;
+            }
+            
+            // Simular loading
+            const btn = document.querySelector('.btn-save');
+            btn.classList.add('loading');
+            
+            setTimeout(() => {
+                btn.classList.remove('loading');
+                
+                // Salvar no localStorage
+                const totalClientes = salvarNoLocalStorage();
+                
+                showNotification(`Cliente cadastrado com sucesso! Total de clientes: ${totalClientes}`);
+                
+                // Limpar formulário
+                document.getElementById('clientForm').reset();
+                document.getElementById('dataCadastro').valueAsDate = new Date();
+            }, 1500);
+        });
+        
+        // Carregar histórico inicialmente (se houver dados)
+        carregarHistorico();
+    </script>
+</body>
+</html>
