@@ -6,6 +6,36 @@
     <title>Cadastro de Clientes - Costur Confecções</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, updateDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCyTwlzsMG5-l07vnrb8XIx9J6AIP_Xuvw",
+            authDomain: "cadastro-cliente-6bd66.firebaseapp.com",
+            projectId: "cadastro-cliente-6bd66",
+            storageBucket: "cadastro-cliente-6bd66.firebasestorage.app",
+            messagingSenderId: "492238035100",
+            appId: "1:492238035100:web:cfb93092a71798dd2e7559"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        // Make Firebase available globally
+        window.firebase = {
+            db,
+            collection,
+            addDoc,
+            getDocs,
+            updateDoc,
+            doc,
+            deleteDoc
+        };
+    </script>
     <style>
         * {
             margin: 0;
@@ -33,7 +63,7 @@
             background-color: #f9f9f9;
             color: var(--text);
             line-height: 1.6;
-            min-width: 1024px;
+            min-width: 1200px;
         }
 
         .container {
@@ -264,6 +294,36 @@
             justify-content: center;
         }
 
+        .btn-pdf {
+            background: var(--danger-color);
+            padding: 12px 25px;
+            font-size: 1rem;
+            width: auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-history {
+            background: var(--warning-color);
+            padding: 12px 25px;
+            font-size: 1rem;
+            width: auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-baixa {
+            background: var(--admin-color);
+            padding: 12px 25px;
+            font-size: 1rem;
+            width: auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         .form-row {
             display: flex;
             gap: 15px;
@@ -372,13 +432,18 @@
             transition: all 0.3s;
         }
 
-        .btn-ver {
-            background: var(--secondary);
+        .btn-pdf-small {
+            background: var(--danger-color);
             color: white;
         }
 
         .btn-baixa-small {
             background: var(--warning-color);
+            color: white;
+        }
+
+        .btn-excluir-small {
+            background: var(--danger-color);
             color: white;
         }
 
@@ -556,18 +621,16 @@
             display: none;
         }
 
-        /* Remover responsividade */
+        /* Responsive adjustments removed for desktop-only */
         @media (max-width: 768px) {
             body {
-                min-width: 1024px;
-                overflow-x: auto;
+                min-width: 100%;
             }
         }
 
         @media (max-width: 480px) {
             body {
-                min-width: 1024px;
-                overflow-x: auto;
+                min-width: 100%;
             }
         }
     </style>
@@ -655,8 +718,8 @@
                     
                     <div class="form-row">
                         <div class="form-group form-group-medium">
-                            <label for="status" class="required"><i class="fas fa-info-circle"></i> Status do Cadastro</label>
-                            <select id="status" name="status" required>
+                            <label for="statusCadastro" class="required"><i class="fas fa-info-circle"></i> Status do Cadastro</label>
+                            <select id="statusCadastro" name="statusCadastro" required>
                                 <option value="Ativo">Ativo</option>
                                 <option value="Inativo">Inativo</option>
                                 <option value="Bloqueado">Bloqueado</option>
@@ -665,9 +728,8 @@
                         </div>
                         
                         <div class="form-group form-group-medium">
-                            <label for="cadastradoPor" class="required"><i class="fas fa-user-edit"></i> Cadastrado Por</label>
+                            <label for="cadastradoPor" class="required"><i class="fas fa-user-edit"></i> Cadastrado por</label>
                             <select id="cadastradoPor" name="cadastradoPor" required>
-                                <option value="">Selecione quem cadastrou</option>
                                 <option value="Wallison Vinicius">Wallison Vinicius</option>
                                 <option value="Eduarda Emmanoelly">Eduarda Emmanoelly</option>
                             </select>
@@ -764,9 +826,14 @@
                 <h2>Histórico de Clientes</h2>
             </div>
             
-            <div class="card history-section">
+            <div class="card">
                 <div class="history-header">
                     <h2><i class="fas fa-history"></i> Clientes Cadastrados</h2>
+                    <div class="history-controls">
+                        <button type="button" class="btn-pdf" id="btn-export-all">
+                            <i class="fas fa-file-export"></i> Exportar Tudo
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="filters">
@@ -794,7 +861,7 @@
                                 <th>Telefone</th>
                                 <th>Data Cadastro</th>
                                 <th>Status</th>
-                                <th>Cadastrado Por</th>
+                                <th>Cadastrado por</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
@@ -857,8 +924,8 @@
     </div>
 
     <script>
-        // Função para gerar ID aleatório (4 números + 8 letras)
-        function gerarID() {
+        // Gerar ID aleatório de 4 números e 8 letras
+        function gerarIdCliente() {
             const numeros = '0123456789';
             const letras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
             let id = '';
@@ -877,11 +944,10 @@
         }
         
         // Definir ID do cliente ao carregar a página
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('idCliente').value = gerarID();
-            document.getElementById('dataCadastro').valueAsDate = new Date();
-            carregarHistorico();
-        });
+        document.getElementById('idCliente').value = gerarIdCliente();
+        
+        // Definir a data atual como padrão para o campo de data de cadastro
+        document.getElementById('dataCadastro').valueAsDate = new Date();
         
         // Formatar telefone
         document.getElementById('telefone').addEventListener('input', function(e) {
@@ -941,16 +1007,16 @@
             return `${dia}/${mes}/${ano}`;
         }
         
-        // Salvar no localStorage
-        function salvarNoLocalStorage() {
+        // Salvar no Firebase
+        async function salvarNoFirebase() {
             const cliente = {
-                id: document.getElementById('idCliente').value,
+                idCliente: document.getElementById('idCliente').value,
                 nome: document.getElementById('nome').value,
                 marca: document.getElementById('marca').value,
                 dataNascimento: document.getElementById('dataNascimento').value,
                 dataCadastro: document.getElementById('dataCadastro').value,
                 telefone: document.getElementById('telefone').value,
-                status: document.getElementById('status').value,
+                statusCadastro: document.getElementById('statusCadastro').value,
                 cadastradoPor: document.getElementById('cadastradoPor').value,
                 rua: document.getElementById('rua').value,
                 numero: document.getElementById('numero').value,
@@ -959,24 +1025,21 @@
                 estado: document.getElementById('estado').value,
                 cep: document.getElementById('cep').value,
                 observacoes: document.getElementById('observacoes').value,
-                dataBaixa: null
+                timestamp: new Date().toISOString()
             };
             
-            // Obter clientes existentes ou criar array vazio
-            let clientes = JSON.parse(localStorage.getItem('clientesCostur')) || [];
-            
-            // Adicionar novo cliente
-            clientes.push(cliente);
-            
-            // Salvar no localStorage
-            localStorage.setItem('clientesCostur', JSON.stringify(clientes));
-            
-            return clientes.length;
+            try {
+                const docRef = await window.firebase.addDoc(window.firebase.collection(window.firebase.db, "clientes"), cliente);
+                console.log("Document written with ID: ", docRef.id);
+                return true;
+            } catch (e) {
+                console.error("Error adding document: ", e);
+                return false;
+            }
         }
         
-        // Carregar histórico do localStorage
-        function carregarHistorico() {
-            const clientes = JSON.parse(localStorage.getItem('clientesCostur')) || [];
+        // Carregar histórico do Firebase
+        async function carregarHistorico() {
             const tbody = document.getElementById('history-table-body');
             const filterStatus = document.getElementById('filter-status').value;
             const filterOrder = document.getElementById('filter-order').value;
@@ -984,79 +1047,133 @@
             // Limpar tabela
             tbody.innerHTML = '';
             
-            if (clientes.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Nenhum cliente cadastrado</td></tr>';
-                return;
+            try {
+                const querySnapshot = await window.firebase.getDocs(window.firebase.collection(window.firebase.db, "clientes"));
+                let clientes = [];
+                
+                querySnapshot.forEach((doc) => {
+                    clientes.push({ id: doc.id, ...doc.data() });
+                });
+                
+                if (clientes.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Nenhum cliente cadastrado</td></tr>';
+                    return;
+                }
+                
+                // Filtrar clientes
+                let clientesFiltrados = [...clientes];
+                
+                if (filterStatus !== 'todos') {
+                    clientesFiltrados = clientesFiltrados.filter(cliente => 
+                        cliente.statusCadastro === filterStatus
+                    );
+                }
+                
+                // Ordenar clientes
+                if (filterOrder === 'recentes') {
+                    clientesFiltrados.sort((a, b) => new Date(b.dataCadastro) - new Date(a.dataCadastro));
+                } else if (filterOrder === 'antigos') {
+                    clientesFiltrados.sort((a, b) => new Date(a.dataCadastro) - new Date(b.dataCadastro));
+                } else if (filterOrder === 'nome') {
+                    clientesFiltrados.sort((a, b) => a.nome.localeCompare(b.nome));
+                }
+                
+                // Preencher tabela
+                clientesFiltrados.forEach(cliente => {
+                    const tr = document.createElement('tr');
+                    
+                    // Formatar data no formato DD/MM/AAAA
+                    const dataCadastro = formatarData(cliente.dataCadastro);
+                    
+                    // Determinar classe CSS baseada no status
+                    let statusClass = 'status-ativo';
+                    if (cliente.statusCadastro === 'Inativo') statusClass = 'status-inativo';
+                    if (cliente.statusCadastro === 'Bloqueado') statusClass = 'status-bloqueado';
+                    if (cliente.statusCadastro === 'Cancelado') statusClass = 'status-cancelado';
+                    
+                    tr.innerHTML = `
+                        <td>${cliente.idCliente}</td>
+                        <td>${cliente.nome}</td>
+                        <td>${cliente.telefone}</td>
+                        <td>${dataCadastro}</td>
+                        <td><span class="${statusClass}">${cliente.statusCadastro}</span></td>
+                        <td>${cliente.cadastradoPor}</td>
+                        <td>
+                            <button class="action-btn btn-pdf-small" onclick="verCadastroCliente('${cliente.id}')">
+                                <i class="fas fa-eye"></i> Ver
+                            </button>
+                            <button class="action-btn btn-baixa-small" onclick="darBaixaCliente('${cliente.id}')">
+                                <i class="fas fa-file-export"></i> Baixa
+                            </button>
+                        </td>
+                    `;
+                    
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error("Error loading documents: ", error);
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Erro ao carregar dados</td></tr>';
             }
-            
-            // Filtrar clientes
-            let clientesFiltrados = [...clientes];
-            
-            if (filterStatus !== 'todos') {
-                clientesFiltrados = clientesFiltrados.filter(cliente => 
-                    cliente.status === filterStatus
-                );
-            }
-            
-            // Ordenar clientes
-            if (filterOrder === 'recentes') {
-                clientesFiltrados.sort((a, b) => new Date(b.dataCadastro) - new Date(a.dataCadastro));
-            } else if (filterOrder === 'antigos') {
-                clientesFiltrados.sort((a, b) => new Date(a.dataCadastro) - new Date(b.dataCadastro));
-            } else if (filterOrder === 'nome') {
-                clientesFiltrados.sort((a, b) => a.nome.localeCompare(b.nome));
-            }
-            
-            // Preencher tabela
-            clientesFiltrados.forEach(cliente => {
-                const tr = document.createElement('tr');
-                
-                // Formatar data no formato DD/MM/AAAA
-                const dataCadastro = formatarData(cliente.dataCadastro);
-                
-                // Definir classe de status
-                let statusClass = '';
-                if (cliente.status === 'Ativo') statusClass = 'status-ativo';
-                else if (cliente.status === 'Inativo') statusClass = 'status-inativo';
-                else if (cliente.status === 'Bloqueado') statusClass = 'status-bloqueado';
-                else if (cliente.status === 'Cancelado') statusClass = 'status-cancelado';
-                
-                tr.innerHTML = `
-                    <td>${cliente.id}</td>
-                    <td>${cliente.nome}</td>
-                    <td>${cliente.telefone}</td>
-                    <td>${dataCadastro}</td>
-                    <td><span class="${statusClass}">${cliente.status}</span></td>
-                    <td>${cliente.cadastradoPor}</td>
-                    <td>
-                        <button class="action-btn btn-ver" onclick="verCadastroCliente('${cliente.id}')">
-                            <i class="fas fa-eye"></i> Ver
-                        </button>
-                        <button class="action-btn btn-baixa-small" onclick="darBaixaCliente('${cliente.id}')">
-                            <i class="fas fa-file-export"></i> Baixa
-                        </button>
-                    </td>
-                `;
-                
-                tbody.appendChild(tr);
-            });
         }
         
         // Ver cadastro de um cliente específico
-        function verCadastroCliente(id) {
-            const clientes = JSON.parse(localStorage.getItem('clientesCostur')) || [];
-            const cliente = clientes.find(c => c.id === id);
+        async function verCadastroCliente(id) {
+            try {
+                const querySnapshot = await window.firebase.getDocs(window.firebase.collection(window.firebase.db, "clientes"));
+                let clienteEncontrado = null;
+                
+                querySnapshot.forEach((doc) => {
+                    if (doc.id === id) {
+                        clienteEncontrado = { id: doc.id, ...doc.data() };
+                    }
+                });
+                
+                if (!clienteEncontrado) {
+                    showNotification('Cliente não encontrado!', false);
+                    return;
+                }
+                
+                // Gerar imagem do cadastro
+                gerarImagemCadastro(clienteEncontrado);
+                
+            } catch (error) {
+                console.error("Error finding client: ", error);
+                showNotification('Erro ao buscar cliente!', false);
+            }
+        }
+        
+        // Dar baixa em um cliente específico
+        async function darBaixaCliente(id) {
+            const senha = prompt('Digite a senha de administrador para dar baixa:');
             
-            if (!cliente) {
-                showNotification('Cliente não encontrado!', false);
+            if (senha !== 'CosturADM2023') {
+                showNotification('Senha incorreta!', false);
                 return;
             }
             
-            // Gerar imagem do cadastro
-            gerarImagemCadastro(cliente);
+            const novoStatus = prompt('Digite o novo status (Inativo, Bloqueado, Cancelado):');
+            
+            if (!novoStatus || !['Inativo', 'Bloqueado', 'Cancelado'].includes(novoStatus)) {
+                showNotification('Status inválido!', false);
+                return;
+            }
+            
+            try {
+                const clienteRef = window.firebase.doc(window.firebase.db, "clientes", id);
+                await window.firebase.updateDoc(clienteRef, {
+                    statusCadastro: novoStatus,
+                    dataBaixa: new Date().toISOString()
+                });
+                
+                carregarHistorico();
+                showNotification('Status atualizado com sucesso!');
+            } catch (error) {
+                console.error("Error updating document: ", error);
+                showNotification('Erro ao atualizar status!', false);
+            }
         }
         
-        // Gerar imagem do cadastro
+        // Gerar imagem do cadastro (PNG)
         function gerarImagemCadastro(cliente) {
             // Criar um canvas para gerar a imagem
             const canvas = document.createElement('canvas');
@@ -1066,26 +1183,27 @@
             canvas.width = 800;
             canvas.height = 1000;
             
-            // Cor de fundo
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
             // Cores
             const primaryColor = '#2c3e50';
             const secondaryColor = '#3498db';
             const textColor = '#333333';
+            const lightColor = '#f9f9f9';
+            
+            // Fundo
+            ctx.fillStyle = lightColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             // Cabeçalho
             ctx.fillStyle = primaryColor;
             ctx.fillRect(0, 0, canvas.width, 80);
             
-            // Título
-            ctx.fillStyle = '#ffffff';
+            // Logo/Título
+            ctx.fillStyle = '#FFFFFF';
             ctx.font = 'bold 24px Arial';
             ctx.textAlign = 'center';
             ctx.fillText('COSTUR CONFECÇÕES', canvas.width / 2, 35);
             
-            ctx.font = '18px Arial';
+            ctx.font = '16px Arial';
             ctx.fillText('Ficha do Cliente', canvas.width / 2, 60);
             
             // Linha decorativa
@@ -1098,193 +1216,110 @@
             
             let y = 130;
             
-            // ID do Cliente
+            // Informações do cliente
             ctx.fillStyle = textColor;
-            ctx.font = 'bold 16px Arial';
+            ctx.font = 'bold 18px Arial';
             ctx.textAlign = 'left';
-            ctx.fillText('ID DO CLIENTE:', 50, y);
-            ctx.font = '16px Arial';
-            ctx.fillText(cliente.id, 180, y);
-            y += 30;
+            ctx.fillText('INFORMAÇÕES DO CLIENTE', 50, y);
             
-            // Status
-            ctx.font = 'bold 16px Arial';
-            ctx.fillText('STATUS:', 50, y);
-            ctx.font = '16px Arial';
-            ctx.fillText(cliente.status, 180, y);
             y += 40;
             
-            // Seção de Dados Pessoais
-            ctx.fillStyle = primaryColor;
-            ctx.font = 'bold 20px Arial';
-            ctx.fillText('DADOS PESSOAIS', 50, y);
-            y += 30;
-            
-            ctx.fillStyle = textColor;
-            ctx.font = 'bold 14px Arial';
-            ctx.fillText('Nome Completo:', 50, y);
             ctx.font = '14px Arial';
-            ctx.fillText(cliente.nome || 'Não informado', 180, y);
+            ctx.fillText(`ID: ${cliente.idCliente}`, 70, y);
             y += 25;
-            
-            ctx.font = 'bold 14px Arial';
-            ctx.fillText('Marca:', 50, y);
-            ctx.font = '14px Arial';
-            ctx.fillText(cliente.marca || 'Não informado', 180, y);
+            ctx.fillText(`Nome: ${cliente.nome}`, 70, y);
             y += 25;
-            
-            ctx.font = 'bold 14px Arial';
-            ctx.fillText('Data de Nascimento:', 50, y);
-            ctx.font = '14px Arial';
-            ctx.fillText(formatarData(cliente.dataNascimento), 180, y);
+            ctx.fillText(`Marca: ${cliente.marca || 'Não informado'}`, 70, y);
             y += 25;
-            
-            ctx.font = 'bold 14px Arial';
-            ctx.fillText('Data de Cadastro:', 50, y);
-            ctx.font = '14px Arial';
-            ctx.fillText(formatarData(cliente.dataCadastro), 180, y);
+            ctx.fillText(`Data Nascimento: ${formatarData(cliente.dataNascimento)}`, 70, y);
             y += 25;
-            
-            ctx.font = 'bold 14px Arial';
-            ctx.fillText('Telefone:', 50, y);
-            ctx.font = '14px Arial';
-            ctx.fillText(cliente.telefone || 'Não informado', 180, y);
+            ctx.fillText(`Data Cadastro: ${formatarData(cliente.dataCadastro)}`, 70, y);
             y += 25;
+            ctx.fillText(`Telefone: ${cliente.telefone}`, 70, y);
+            y += 25;
+            ctx.fillText(`Status: ${cliente.statusCadastro}`, 70, y);
+            y += 25;
+            ctx.fillText(`Cadastrado por: ${cliente.cadastradoPor}`, 70, y);
             
-            ctx.font = 'bold 14px Arial';
-            ctx.fillText('Cadastrado Por:', 50, y);
-            ctx.font = '14px Arial';
-            ctx.fillText(cliente.cadastradoPor || 'Não informado', 180, y);
             y += 40;
             
-            // Seção de Endereço
-            ctx.fillStyle = primaryColor;
-            ctx.font = 'bold 20px Arial';
+            // Endereço
+            ctx.font = 'bold 18px Arial';
             ctx.fillText('ENDEREÇO', 50, y);
-            y += 30;
             
-            ctx.fillStyle = textColor;
-            ctx.font = 'bold 14px Arial';
-            ctx.fillText('Rua:', 50, y);
-            ctx.font = '14px Arial';
-            ctx.fillText(cliente.rua || 'Não informado', 180, y);
-            y += 25;
-            
-            ctx.font = 'bold 14px Arial';
-            ctx.fillText('Número:', 50, y);
-            ctx.font = '14px Arial';
-            ctx.fillText(cliente.numero || 'Não informado', 180, y);
-            y += 25;
-            
-            ctx.font = 'bold 14px Arial';
-            ctx.fillText('Bairro:', 50, y);
-            ctx.font = '14px Arial';
-            ctx.fillText(cliente.bairro || 'Não informado', 180, y);
-            y += 25;
-            
-            ctx.font = 'bold 14px Arial';
-            ctx.fillText('Cidade:', 50, y);
-            ctx.font = '14px Arial';
-            ctx.fillText(cliente.cidade || 'Não informado', 180, y);
-            y += 25;
-            
-            ctx.font = 'bold 14px Arial';
-            ctx.fillText('Estado:', 50, y);
-            ctx.font = '14px Arial';
-            ctx.fillText(cliente.estado || 'Não informado', 180, y);
-            y += 25;
-            
-            ctx.font = 'bold 14px Arial';
-            ctx.fillText('CEP:', 50, y);
-            ctx.font = '14px Arial';
-            ctx.fillText(cliente.cep || 'Não informado', 180, y);
             y += 40;
             
-            // Seção de Observações
+            ctx.font = '14px Arial';
+            ctx.fillText(`Rua: ${cliente.rua}`, 70, y);
+            y += 25;
+            ctx.fillText(`Número: ${cliente.numero}`, 70, y);
+            y += 25;
+            ctx.fillText(`Bairro: ${cliente.bairro}`, 70, y);
+            y += 25;
+            ctx.fillText(`Cidade: ${cliente.cidade}`, 70, y);
+            y += 25;
+            ctx.fillText(`Estado: ${cliente.estado}`, 70, y);
+            y += 25;
+            ctx.fillText(`CEP: ${cliente.cep}`, 70, y);
+            
+            y += 40;
+            
+            // Observações
             if (cliente.observacoes) {
-                ctx.fillStyle = primaryColor;
-                ctx.font = 'bold 20px Arial';
+                ctx.font = 'bold 18px Arial';
                 ctx.fillText('OBSERVAÇÕES', 50, y);
-                y += 30;
                 
-                ctx.fillStyle = textColor;
+                y += 40;
+                
                 ctx.font = '14px Arial';
-                
-                // Quebrar texto em várias linhas
-                const observacoes = cliente.observacoes;
-                const maxWidth = 700;
-                const lineHeight = 20;
-                const words = observacoes.split(' ');
-                let line = '';
-                let testLine = '';
-                
-                for (let i = 0; i < words.length; i++) {
-                    testLine = line + words[i] + ' ';
-                    const metrics = ctx.measureText(testLine);
-                    const testWidth = metrics.width;
-                    
-                    if (testWidth > maxWidth && i > 0) {
-                        ctx.fillText(line, 50, y);
-                        line = words[i] + ' ';
-                        y += lineHeight;
-                    } else {
-                        line = testLine;
-                    }
-                }
-                ctx.fillText(line, 50, y);
-                y += lineHeight;
+                const observacoesLines = quebrarTexto(ctx, cliente.observacoes, canvas.width - 140);
+                observacoesLines.forEach(line => {
+                    ctx.fillText(line, 70, y);
+                    y += 25;
+                });
             }
             
             // Rodapé
             const now = new Date();
             const dataHora = now.toLocaleString('pt-BR');
             
-            ctx.fillStyle = '#999999';
             ctx.font = '12px Arial';
+            ctx.fillStyle = '#777777';
             ctx.textAlign = 'center';
             ctx.fillText(`Documento gerado em: ${dataHora}`, canvas.width / 2, canvas.height - 30);
             
-            // Linha decorativa no rodapé
-            ctx.strokeStyle = secondaryColor;
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(50, canvas.height - 50);
-            ctx.lineTo(canvas.width - 50, canvas.height - 50);
-            ctx.stroke();
-            
             // Converter canvas para imagem e fazer download
-            const dataURL = canvas.toDataURL('image/png');
             const link = document.createElement('a');
             link.download = `cadastro_${cliente.nome.replace(/\s+/g, '_')}.png`;
-            link.href = dataURL;
-            document.body.appendChild(link);
+            link.href = canvas.toDataURL('image/png');
             link.click();
-            document.body.removeChild(link);
             
             showNotification('Imagem do cadastro gerada com sucesso!');
         }
         
-        // Dar baixa em um cliente específico
-        function darBaixaCliente(id) {
-            const senha = prompt('Digite a senha de administrador para dar baixa:');
+        // Função para quebrar texto em múltiplas linhas
+        function quebrarTexto(ctx, texto, maxWidth) {
+            const palavras = texto.split(' ');
+            const linhas = [];
+            let linhaAtual = '';
             
-            if (senha !== 'CosturADM2023') {
-                showNotification('Senha incorreta!', false);
-                return;
+            for (let i = 0; i < palavras.length; i++) {
+                const palavra = palavras[i];
+                const largura = ctx.measureText(linhaAtual + ' ' + palavra).width;
+                
+                if (largura < maxWidth) {
+                    linhaAtual += (linhaAtual ? ' ' : '') + palavra;
+                } else {
+                    linhas.push(linhaAtual);
+                    linhaAtual = palavra;
+                }
             }
             
-            const clientes = JSON.parse(localStorage.getItem('clientesCostur')) || [];
-            const clienteIndex = clientes.findIndex(c => c.id === id);
-            
-            if (clienteIndex !== -1) {
-                clientes[clienteIndex].status = 'Inativo';
-                clientes[clienteIndex].dataBaixa = new Date().toISOString();
-                
-                localStorage.setItem('clientesCostur', JSON.stringify(clientes));
-                carregarHistorico();
-                
-                showNotification('Baixa realizada com sucesso!');
+            if (linhaAtual) {
+                linhas.push(linhaAtual);
             }
+            
+            return linhas;
         }
         
         // Filtros
@@ -1292,15 +1327,13 @@
         document.getElementById('filter-order').addEventListener('change', carregarHistorico);
         
         // Manipular o envio do formulário
-        document.getElementById('clientForm').addEventListener('submit', function(e) {
+        document.getElementById('clientForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             // Validar campos obrigatórios
             const nome = document.getElementById('nome').value;
             const dataCadastro = document.getElementById('dataCadastro').value;
             const telefone = document.getElementById('telefone').value;
-            const status = document.getElementById('status').value;
-            const cadastradoPor = document.getElementById('cadastradoPor').value;
             const rua = document.getElementById('rua').value;
             const numero = document.getElementById('numero').value;
             const bairro = document.getElementById('bairro').value;
@@ -1308,22 +1341,59 @@
             const estado = document.getElementById('estado').value;
             const cep = document.getElementById('cep').value;
             
-            if (!nome || !dataCadastro || !telefone || !status || !cadastradoPor || !rua || !numero || !bairro || !cidade || !estado || !cep) {
+            if (!nome || !dataCadastro || !telefone || !rua || !numero || !bairro || !cidade || !estado || !cep) {
                 showNotification('Preencha todos os campos obrigatórios!', false);
                 return;
             }
             
-            // Salvar no localStorage
-            const totalClientes = salvarNoLocalStorage();
+            // Salvar no Firebase
+            const sucesso = await salvarNoFirebase();
             
-            showNotification(`Cliente cadastrado com sucesso! Total de clientes: ${totalClientes}`);
-            
-            // Limpar formulário e gerar novo ID
-            document.getElementById('clientForm').reset();
-            document.getElementById('idCliente').value = gerarID();
-            document.getElementById('dataCadastro').valueAsDate = new Date();
-            
-            // Atualizar histórico
+            if (sucesso) {
+                showNotification('Cliente cadastrado com sucesso!');
+                
+                // Limpar formulário e gerar novo ID
+                document.getElementById('clientForm').reset();
+                document.getElementById('idCliente').value = gerarIdCliente();
+                document.getElementById('dataCadastro').valueAsDate = new Date();
+                
+                // Atualizar histórico
+                carregarHistorico();
+            } else {
+                showNotification('Erro ao cadastrar cliente!', false);
+            }
+        });
+        
+        // Exportar todos os clientes
+        document.getElementById('btn-export-all').addEventListener('click', async function() {
+            try {
+                const querySnapshot = await window.firebase.getDocs(window.firebase.collection(window.firebase.db, "clientes"));
+                const clientes = [];
+                
+                querySnapshot.forEach((doc) => {
+                    clientes.push({ id: doc.id, ...doc.data() });
+                });
+                
+                if (clientes.length === 0) {
+                    showNotification('Nenhum cliente para exportar!', false);
+                    return;
+                }
+                
+                // Gerar imagem para cada cliente
+                for (const cliente of clientes) {
+                    await new Promise(resolve => setTimeout(resolve, 100)); // Pequeno delay
+                    gerarImagemCadastro(cliente);
+                }
+                
+                showNotification('Todos os clientes exportados com sucesso!');
+            } catch (error) {
+                console.error("Error exporting documents: ", error);
+                showNotification('Erro ao exportar clientes!', false);
+            }
+        });
+        
+        // Carregar histórico inicialmente
+        document.addEventListener('DOMContentLoaded', function() {
             carregarHistorico();
         });
     </script>
