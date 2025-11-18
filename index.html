@@ -29,7 +29,6 @@
     </script>
 
     <style>
-        /* TODO O SEU CSS ORIGINAL PERMANECE IGUAL */
         * {
             margin: 0;
             padding: 0;
@@ -418,6 +417,11 @@
 
         .btn-excluir-small {
             background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-editar-small {
+            background: var(--secondary);
             color: white;
         }
 
@@ -1255,7 +1259,7 @@
             }
         }
         
-        // Carregar histórico APENAS do Firebase
+        // Carregar histórico APENAS do Firebase - FUNÇÃO CORRIGIDA
         async function carregarHistorico() {
             try {
                 const clientes = await carregarClientesFirebase();
@@ -1304,6 +1308,9 @@
                         <td>
                             <button class="action-btn btn-pdf-small" onclick="gerarPDFCliente('${cliente.id}')">
                                 <i class="fas fa-file-pdf"></i> PDF
+                            </button>
+                            <button class="action-btn btn-editar-small" onclick="editarCliente('${cliente.id}')">
+                                <i class="fas fa-edit"></i> Editar
                             </button>
                             ${cliente.status === 'Ativo' ? 
                                 `<button class="action-btn btn-baixa-small" onclick="darBaixaCliente('${cliente.id}')">
@@ -1491,7 +1498,7 @@
             }
         }
         
-        // Dar baixa em um cliente específico
+        // Dar baixa em um cliente específico - FUNÇÃO CORRIGIDA
         async function darBaixaCliente(id) {
             const senha = prompt('Digite a senha de administrador para dar baixa:');
             
@@ -1501,24 +1508,27 @@
             }
             
             try {
+                console.log("Tentando dar baixa no cliente ID:", id);
+                
                 const sucesso = await atualizarClienteFirebase(id, {
                     status: 'Baixada',
                     dataBaixa: new Date().toISOString()
                 });
                 
                 if (sucesso) {
-                    carregarHistorico();
                     showNotification('Baixa realizada com sucesso!');
+                    // Recarregar o histórico para mostrar a atualização
+                    carregarHistorico();
                 } else {
-                    showNotification('Erro ao realizar baixa!', false);
+                    showNotification('Erro ao realizar baixa no Firebase!', false);
                 }
             } catch (e) {
-                console.error("Erro ao dar baixa: ", e);
+                console.error("Erro ao dar baixa:", e);
                 showNotification('Erro ao realizar baixa!', false);
             }
         }
         
-        // Excluir um cliente
+        // Excluir um cliente - FUNÇÃO CORRIGIDA
         async function excluirCliente(id) {
             const senha = prompt('Digite a senha de administrador para excluir o cliente:');
             
@@ -1532,17 +1542,63 @@
             }
             
             try {
+                console.log("Tentando excluir cliente ID:", id);
+                
                 const sucesso = await excluirClienteFirebase(id);
                 
                 if (sucesso) {
-                    carregarHistorico();
                     showNotification('Cliente excluído com sucesso!');
+                    // Recarregar o histórico para remover o cliente da lista
+                    carregarHistorico();
                 } else {
-                    showNotification('Erro ao excluir cliente!', false);
+                    showNotification('Erro ao excluir cliente do Firebase!', false);
                 }
             } catch (e) {
-                console.error("Erro ao excluir cliente: ", e);
+                console.error("Erro ao excluir cliente:", e);
                 showNotification('Erro ao excluir cliente!', false);
+            }
+        }
+        
+        // Função para editar cliente - NOVA FUNÇÃO ADICIONADA
+        async function editarCliente(id) {
+            try {
+                const clientes = await carregarClientesFirebase();
+                const cliente = clientes.find(c => c.id === id);
+                
+                if (!cliente) {
+                    showNotification('Cliente não encontrado!', false);
+                    return;
+                }
+                
+                // Preencher o formulário com os dados do cliente
+                document.getElementById('nome').value = cliente.nome || '';
+                document.getElementById('marca').value = cliente.marca || '';
+                document.getElementById('dataNascimento').value = cliente.dataNascimento || '';
+                document.getElementById('dataCadastro').value = cliente.dataCadastro || '';
+                document.getElementById('telefone').value = cliente.telefone || '';
+                document.getElementById('rua').value = cliente.rua || '';
+                document.getElementById('numero').value = cliente.numero || '';
+                document.getElementById('bairro').value = cliente.bairro || '';
+                document.getElementById('cidade').value = cliente.cidade || '';
+                document.getElementById('estado').value = cliente.estado || '';
+                document.getElementById('cep').value = cliente.cep || '';
+                document.getElementById('observacoes').value = cliente.observacoes || '';
+                
+                // Mudar o texto do botão para "Atualizar"
+                const btnSalvar = document.querySelector('.btn-save');
+                btnSalvar.innerHTML = '<i class="fas fa-sync-alt"></i> Atualizar Cadastro';
+                
+                // Armazenar o ID do cliente sendo editado
+                btnSalvar.setAttribute('data-editing-id', id);
+                
+                // Rolar até o formulário
+                document.getElementById('cadastro').scrollIntoView({ behavior: 'smooth' });
+                
+                showNotification('Cliente carregado para edição!');
+                
+            } catch (e) {
+                console.error("Erro ao carregar cliente para edição:", e);
+                showNotification('Erro ao carregar cliente!', false);
             }
         }
         
@@ -1553,6 +1609,9 @@
         });
         
         document.getElementById('btn-back-form').addEventListener('click', function() {
+            const btnSalvar = document.querySelector('.btn-save');
+            btnSalvar.innerHTML = '<i class="fas fa-save"></i> Salvar Cadastro';
+            btnSalvar.removeAttribute('data-editing-id');
             document.getElementById('history-section').classList.add('hidden');
         });
         
@@ -1560,7 +1619,7 @@
         document.getElementById('filter-status').addEventListener('change', carregarHistorico);
         document.getElementById('filter-order').addEventListener('change', carregarHistorico);
         
-        // Manipular o envio do formulário
+        // Manipular o envio do formulário - FUNÇÃO CORRIGIDA
         document.getElementById('clientForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -1581,15 +1640,54 @@
             }
             
             try {
-                // Salvar APENAS no Firebase
-                const totalClientes = await salvarCliente();
+                const btnSalvar = document.querySelector('.btn-save');
+                const editingId = btnSalvar.getAttribute('data-editing-id');
                 
-                showNotification(`Cliente cadastrado com sucesso! Total de clientes: ${totalClientes}`);
+                if (editingId) {
+                    // MODO EDIÇÃO - Atualizar cliente existente
+                    const clienteAtualizado = {
+                        nome: document.getElementById('nome').value,
+                        marca: document.getElementById('marca').value,
+                        dataNascimento: document.getElementById('dataNascimento').value,
+                        dataCadastro: document.getElementById('dataCadastro').value,
+                        telefone: document.getElementById('telefone').value,
+                        rua: document.getElementById('rua').value,
+                        numero: document.getElementById('numero').value,
+                        bairro: document.getElementById('bairro').value,
+                        cidade: document.getElementById('cidade').value,
+                        estado: document.getElementById('estado').value,
+                        cep: document.getElementById('cep').value,
+                        observacoes: document.getElementById('observacoes').value,
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    const sucesso = await atualizarClienteFirebase(editingId, clienteAtualizado);
+                    
+                    if (sucesso) {
+                        showNotification('Cliente atualizado com sucesso!');
+                        // Resetar o botão para modo normal
+                        btnSalvar.innerHTML = '<i class="fas fa-save"></i> Salvar Cadastro';
+                        btnSalvar.removeAttribute('data-editing-id');
+                    } else {
+                        showNotification('Erro ao atualizar cliente!', false);
+                    }
+                } else {
+                    // MODO NOVO CADASTRO
+                    const totalClientes = await salvarCliente();
+                    showNotification(`Cliente cadastrado com sucesso! Total de clientes: ${totalClientes}`);
+                }
                 
                 // Limpar formulário
                 document.getElementById('clientForm').reset();
                 document.getElementById('dataCadastro').valueAsDate = new Date();
+                
+                // Recarregar histórico se estiver visível
+                if (!document.getElementById('history-section').classList.contains('hidden')) {
+                    carregarHistorico();
+                }
+                
             } catch (e) {
+                console.error("Erro ao salvar/atualizar cliente:", e);
                 showNotification('Erro ao salvar cliente!', false);
             }
         });
@@ -1601,6 +1699,7 @@
         window.gerarPDFCliente = gerarPDFCliente;
         window.darBaixaCliente = darBaixaCliente;
         window.excluirCliente = excluirCliente;
+        window.editarCliente = editarCliente;
         window.carregarHistorico = carregarHistorico;
     </script>
 </body>
