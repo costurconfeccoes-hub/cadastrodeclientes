@@ -29,6 +29,7 @@
     </script>
 
     <style>
+        /* TODO O SEU CSS ORIGINAL PERMANECE IGUAL */
         * {
             margin: 0;
             padding: 0;
@@ -1224,10 +1225,9 @@
             showNotification('PDF gerado com sucesso!');
         });
         
-        // Salvar no localStorage E Firebase
-        async function salvarNoLocalStorage() {
+        // Salvar APENAS no Firebase
+        async function salvarCliente() {
             const cliente = {
-                id: Date.now(), // ID único baseado no timestamp
                 nome: document.getElementById('nome').value,
                 marca: document.getElementById('marca').value,
                 dataNascimento: document.getElementById('dataNascimento').value,
@@ -1240,253 +1240,255 @@
                 estado: document.getElementById('estado').value,
                 cep: document.getElementById('cep').value,
                 observacoes: document.getElementById('observacoes').value,
-                status: 'Ativo', // Status inicial
-                dataBaixa: null, // Data de baixa (quando aplicável)
+                status: 'Ativo',
+                dataBaixa: null,
                 timestamp: new Date().toISOString()
             };
             
-            // Obter clientes existentes ou criar array vazio
-            let clientes = JSON.parse(localStorage.getItem('clientesCostur')) || [];
-            
-            // Adicionar novo cliente
-            clientes.push(cliente);
-            
-            // Salvar no localStorage
-            localStorage.setItem('clientesCostur', JSON.stringify(clientes));
-            
-            // Salvar no Firebase também
             try {
                 await salvarClienteFirebase(cliente);
-                console.log("Cliente salvo no Firebase também");
+                const clientes = await carregarClientesFirebase();
+                return clientes.length;
             } catch (e) {
-                console.error("Erro ao salvar no Firebase, mas cliente foi salvo localmente: ", e);
+                console.error("Erro ao salvar cliente: ", e);
+                throw e;
             }
-            
-            return clientes.length;
         }
         
-        // Carregar histórico do localStorage E Firebase
+        // Carregar histórico APENAS do Firebase
         async function carregarHistorico() {
-            const clientes = JSON.parse(localStorage.getItem('clientesCostur')) || [];
-            const tbody = document.getElementById('history-table-body');
-            const filterStatus = document.getElementById('filter-status').value;
-            const filterOrder = document.getElementById('filter-order').value;
-            
-            // Limpar tabela
-            tbody.innerHTML = '';
-            
-            if (clientes.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum cliente cadastrado</td></tr>';
-                return;
-            }
-            
-            // Filtrar clientes
-            let clientesFiltrados = [...clientes];
-            
-            if (filterStatus !== 'todos') {
-                clientesFiltrados = clientesFiltrados.filter(cliente => 
-                    cliente.status.toLowerCase() === filterStatus.toLowerCase()
-                );
-            }
-            
-            // Ordenar clientes
-            if (filterOrder === 'recentes') {
-                clientesFiltrados.sort((a, b) => new Date(b.dataCadastro) - new Date(a.dataCadastro));
-            } else if (filterOrder === 'antigos') {
-                clientesFiltrados.sort((a, b) => new Date(a.dataCadastro) - new Date(b.dataCadastro));
-            } else if (filterOrder === 'nome') {
-                clientesFiltrados.sort((a, b) => a.nome.localeCompare(b.nome));
-            }
-            
-            // Preencher tabela
-            clientesFiltrados.forEach(cliente => {
-                const tr = document.createElement('tr');
+            try {
+                const clientes = await carregarClientesFirebase();
+                const tbody = document.getElementById('history-table-body');
+                const filterStatus = document.getElementById('filter-status').value;
+                const filterOrder = document.getElementById('filter-order').value;
                 
-                // Formatar data no formato DD/MM/AAAA
-                const dataCadastro = formatarData(cliente.dataCadastro);
+                // Limpar tabela
+                tbody.innerHTML = '';
                 
-                tr.innerHTML = `
-                    <td>${cliente.nome}</td>
-                    <td>${cliente.telefone}</td>
-                    <td>${dataCadastro}</td>
-                    <td><span class="${cliente.status === 'Ativo' ? 'status-ativo' : 'status-baixada'}">${cliente.status}</span></td>
-                    <td>
-                        <button class="action-btn btn-pdf-small" onclick="gerarPDFCliente(${cliente.id})">
-                            <i class="fas fa-file-pdf"></i> PDF
-                        </button>
-                        ${cliente.status === 'Ativo' ? 
-                            `<button class="action-btn btn-baixa-small" onclick="darBaixaCliente(${cliente.id})">
-                                <i class="fas fa-file-export"></i> Baixa
-                            </button>` : 
-                            ''
-                        }
-                        <button class="action-btn btn-excluir-small" onclick="excluirCliente(${cliente.id})">
-                            <i class="fas fa-trash"></i> Excluir
-                        </button>
-                    </td>
-                `;
+                if (clientes.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum cliente cadastrado</td></tr>';
+                    return;
+                }
                 
-                tbody.appendChild(tr);
-            });
+                // Filtrar clientes
+                let clientesFiltrados = [...clientes];
+                
+                if (filterStatus !== 'todos') {
+                    clientesFiltrados = clientesFiltrados.filter(cliente => 
+                        cliente.status.toLowerCase() === filterStatus.toLowerCase()
+                    );
+                }
+                
+                // Ordenar clientes
+                if (filterOrder === 'recentes') {
+                    clientesFiltrados.sort((a, b) => new Date(b.dataCadastro) - new Date(a.dataCadastro));
+                } else if (filterOrder === 'antigos') {
+                    clientesFiltrados.sort((a, b) => new Date(a.dataCadastro) - new Date(b.dataCadastro));
+                } else if (filterOrder === 'nome') {
+                    clientesFiltrados.sort((a, b) => a.nome.localeCompare(b.nome));
+                }
+                
+                // Preencher tabela
+                clientesFiltrados.forEach(cliente => {
+                    const tr = document.createElement('tr');
+                    
+                    // Formatar data no formato DD/MM/AAAA
+                    const dataCadastro = formatarData(cliente.dataCadastro);
+                    
+                    tr.innerHTML = `
+                        <td>${cliente.nome}</td>
+                        <td>${cliente.telefone}</td>
+                        <td>${dataCadastro}</td>
+                        <td><span class="${cliente.status === 'Ativo' ? 'status-ativo' : 'status-baixada'}">${cliente.status}</span></td>
+                        <td>
+                            <button class="action-btn btn-pdf-small" onclick="gerarPDFCliente('${cliente.id}')">
+                                <i class="fas fa-file-pdf"></i> PDF
+                            </button>
+                            ${cliente.status === 'Ativo' ? 
+                                `<button class="action-btn btn-baixa-small" onclick="darBaixaCliente('${cliente.id}')">
+                                    <i class="fas fa-file-export"></i> Baixa
+                                </button>` : 
+                                ''
+                            }
+                            <button class="action-btn btn-excluir-small" onclick="excluirCliente('${cliente.id}')">
+                                <i class="fas fa-trash"></i> Excluir
+                            </button>
+                        </td>
+                    `;
+                    
+                    tbody.appendChild(tr);
+                });
+                
+            } catch (e) {
+                console.error("Erro ao carregar histórico: ", e);
+                showNotification('Erro ao carregar clientes!', false);
+            }
         }
         
         // Gerar PDF para um cliente específico
-        function gerarPDFCliente(id) {
-            const clientes = JSON.parse(localStorage.getItem('clientesCostur')) || [];
-            const cliente = clientes.find(c => c.id === id);
-            
-            if (!cliente) {
-                showNotification('Cliente não encontrado!', false);
-                return;
-            }
-            
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            // Cores para o PDF
-            const primaryColor = [44, 62, 80];
-            const secondaryColor = [52, 152, 219];
-            const successColor = [46, 204, 113];
-            const dangerColor = [231, 76, 60];
-            
-            // Cabeçalho
-            doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-            doc.rect(0, 0, 210, 35, 'F');
-            
-            // Título
-            doc.setFontSize(20);
-            doc.setTextColor(255, 255, 255);
-            doc.text('COSTUR CONFECÇÕES', 105, 15, { align: 'center' });
-            
-            doc.setFontSize(14);
-            doc.setTextColor(255, 255, 255);
-            doc.text('Ficha do Cliente', 105, 25, { align: 'center' });
-            
-            // Linha decorativa
-            doc.setDrawColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
-            doc.setLineWidth(2);
-            doc.line(20, 40, 190, 40);
-            
-            let y = 55;
-            
-            // Status do cliente
-            doc.setFontSize(12);
-            if (cliente.status === 'Ativo') {
-                doc.setTextColor(successColor[0], successColor[1], successColor[2]);
-            } else {
-                doc.setTextColor(dangerColor[0], dangerColor[1], dangerColor[2]);
-            }
-            doc.text(`STATUS: ${cliente.status}`, 20, y);
-            y += 10;
-            
-            // Seção de Dados Pessoais
-            doc.setFontSize(16);
-            doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-            doc.text('DADOS PESSOAIS', 20, y);
-            y += 10;
-            
-            doc.setFontSize(10);
-            doc.setTextColor(0, 0, 0);
-            
-            // Nome
-            doc.setFont(undefined, 'bold');
-            doc.text('Nome Completo:', 20, y);
-            doc.setFont(undefined, 'normal');
-            doc.text(cliente.nome || 'Não informado', 60, y);
-            y += 8;
-            
-            // Marca
-            doc.setFont(undefined, 'bold');
-            doc.text('Marca:', 20, y);
-            doc.setFont(undefined, 'normal');
-            doc.text(cliente.marca || 'Não informado', 60, y);
-            y += 8;
-            
-            // Data de Nascimento
-            doc.setFont(undefined, 'bold');
-            doc.text('Data de Nascimento:', 20, y);
-            doc.setFont(undefined, 'normal');
-            doc.text(formatarData(cliente.dataNascimento), 70, y);
-            y += 8;
-            
-            // Data de Cadastro
-            doc.setFont(undefined, 'bold');
-            doc.text('Data de Cadastro:', 20, y);
-            doc.setFont(undefined, 'normal');
-            doc.text(formatarData(cliente.dataCadastro), 70, y);
-            y += 8;
-            
-            // Telefone
-            doc.setFont(undefined, 'bold');
-            doc.text('Telefone:', 20, y);
-            doc.setFont(undefined, 'normal');
-            doc.text(cliente.telefone || 'Não informado', 60, y);
-            y += 15;
-            
-            // Seção de Endereço
-            doc.setFontSize(16);
-            doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-            doc.text('ENDEREÇO', 20, y);
-            y += 10;
-            
-            doc.setFontSize(10);
-            doc.setTextColor(0, 0, 0);
-            
-            const endereco = [
-                `Rua: ${cliente.rua || 'Não informado'}`,
-                `Número: ${cliente.numero || 'Não informado'}`,
-                `Bairro: ${cliente.bairro || 'Não informado'}`,
-                `Cidade: ${cliente.cidade || 'Não informado'}`,
-                `Estado: ${cliente.estado || 'Não informado'}`,
-                `CEP: ${cliente.cep || 'Não informado'}`
-            ];
-            
-            endereco.forEach(linha => {
-                doc.text(linha, 25, y);
-                y += 6;
-            });
-            
-            y += 8;
-            
-            // Seção de Observações
-            if (cliente.observacoes) {
+        async function gerarPDFCliente(id) {
+            try {
+                const clientes = await carregarClientesFirebase();
+                const cliente = clientes.find(c => c.id === id);
+                
+                if (!cliente) {
+                    showNotification('Cliente não encontrado!', false);
+                    return;
+                }
+                
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Cores para o PDF
+                const primaryColor = [44, 62, 80];
+                const secondaryColor = [52, 152, 219];
+                const successColor = [46, 204, 113];
+                const dangerColor = [231, 76, 60];
+                
+                // Cabeçalho
+                doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+                doc.rect(0, 0, 210, 35, 'F');
+                
+                // Título
+                doc.setFontSize(20);
+                doc.setTextColor(255, 255, 255);
+                doc.text('COSTUR CONFECÇÕES', 105, 15, { align: 'center' });
+                
+                doc.setFontSize(14);
+                doc.setTextColor(255, 255, 255);
+                doc.text('Ficha do Cliente', 105, 25, { align: 'center' });
+                
+                // Linha decorativa
+                doc.setDrawColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
+                doc.setLineWidth(2);
+                doc.line(20, 40, 190, 40);
+                
+                let y = 55;
+                
+                // Status do cliente
+                doc.setFontSize(12);
+                if (cliente.status === 'Ativo') {
+                    doc.setTextColor(successColor[0], successColor[1], successColor[2]);
+                } else {
+                    doc.setTextColor(dangerColor[0], dangerColor[1], dangerColor[2]);
+                }
+                doc.text(`STATUS: ${cliente.status}`, 20, y);
+                y += 10;
+                
+                // Seção de Dados Pessoais
                 doc.setFontSize(16);
                 doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-                doc.text('OBSERVAÇÕES', 20, y);
+                doc.text('DADOS PESSOAIS', 20, y);
                 y += 10;
                 
                 doc.setFontSize(10);
                 doc.setTextColor(0, 0, 0);
                 
-                const splitObservacoes = doc.splitTextToSize(cliente.observacoes, 170);
-                doc.text(splitObservacoes, 25, y);
-                y += splitObservacoes.length * 4;
+                // Nome
+                doc.setFont(undefined, 'bold');
+                doc.text('Nome Completo:', 20, y);
+                doc.setFont(undefined, 'normal');
+                doc.text(cliente.nome || 'Não informado', 60, y);
+                y += 8;
+                
+                // Marca
+                doc.setFont(undefined, 'bold');
+                doc.text('Marca:', 20, y);
+                doc.setFont(undefined, 'normal');
+                doc.text(cliente.marca || 'Não informado', 60, y);
+                y += 8;
+                
+                // Data de Nascimento
+                doc.setFont(undefined, 'bold');
+                doc.text('Data de Nascimento:', 20, y);
+                doc.setFont(undefined, 'normal');
+                doc.text(formatarData(cliente.dataNascimento), 70, y);
+                y += 8;
+                
+                // Data de Cadastro
+                doc.setFont(undefined, 'bold');
+                doc.text('Data de Cadastro:', 20, y);
+                doc.setFont(undefined, 'normal');
+                doc.text(formatarData(cliente.dataCadastro), 70, y);
+                y += 8;
+                
+                // Telefone
+                doc.setFont(undefined, 'bold');
+                doc.text('Telefone:', 20, y);
+                doc.setFont(undefined, 'normal');
+                doc.text(cliente.telefone || 'Não informado', 60, y);
+                y += 15;
+                
+                // Seção de Endereço
+                doc.setFontSize(16);
+                doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+                doc.text('ENDEREÇO', 20, y);
+                y += 10;
+                
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                
+                const endereco = [
+                    `Rua: ${cliente.rua || 'Não informado'}`,
+                    `Número: ${cliente.numero || 'Não informado'}`,
+                    `Bairro: ${cliente.bairro || 'Não informado'}`,
+                    `Cidade: ${cliente.cidade || 'Não informado'}`,
+                    `Estado: ${cliente.estado || 'Não informado'}`,
+                    `CEP: ${cliente.cep || 'Não informado'}`
+                ];
+                
+                endereco.forEach(linha => {
+                    doc.text(linha, 25, y);
+                    y += 6;
+                });
+                
+                y += 8;
+                
+                // Seção de Observações
+                if (cliente.observacoes) {
+                    doc.setFontSize(16);
+                    doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+                    doc.text('OBSERVAÇÕES', 20, y);
+                    y += 10;
+                    
+                    doc.setFontSize(10);
+                    doc.setTextColor(0, 0, 0);
+                    
+                    const splitObservacoes = doc.splitTextToSize(cliente.observacoes, 170);
+                    doc.text(splitObservacoes, 25, y);
+                    y += splitObservacoes.length * 4;
+                }
+                
+                // Data da Baixa (se aplicável)
+                if (cliente.status === 'Baixada' && cliente.dataBaixa) {
+                    doc.setFontSize(12);
+                    doc.setTextColor(dangerColor[0], dangerColor[1], dangerColor[2]);
+                    doc.text(`Data da Baixa: ${formatarData(cliente.dataBaixa)}`, 20, y + 10);
+                }
+                
+                // Rodapé
+                const now = new Date();
+                const dataHora = now.toLocaleString('pt-BR');
+                
+                doc.setFontSize(8);
+                doc.setTextColor(150, 150, 150);
+                doc.text(`Documento gerado em: ${dataHora}`, 105, 285, { align: 'center' });
+                
+                // Linha decorativa no rodapé
+                doc.setDrawColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
+                doc.setLineWidth(1);
+                doc.line(20, 275, 190, 275);
+                
+                // Salvar PDF
+                doc.save(`ficha_${cliente.nome.replace(/\s+/g, '_')}.pdf`);
+                
+                showNotification('PDF do cliente gerado com sucesso!');
+                
+            } catch (e) {
+                console.error("Erro ao gerar PDF: ", e);
+                showNotification('Erro ao gerar PDF!', false);
             }
-            
-            // Data da Baixa (se aplicável)
-            if (cliente.status === 'Baixada' && cliente.dataBaixa) {
-                doc.setFontSize(12);
-                doc.setTextColor(dangerColor[0], dangerColor[1], dangerColor[2]);
-                doc.text(`Data da Baixa: ${formatarData(cliente.dataBaixa)}`, 20, y + 10);
-            }
-            
-            // Rodapé
-            const now = new Date();
-            const dataHora = now.toLocaleString('pt-BR');
-            
-            doc.setFontSize(8);
-            doc.setTextColor(150, 150, 150);
-            doc.text(`Documento gerado em: ${dataHora}`, 105, 285, { align: 'center' });
-            
-            // Linha decorativa no rodapé
-            doc.setDrawColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
-            doc.setLineWidth(1);
-            doc.line(20, 275, 190, 275);
-            
-            // Salvar PDF
-            doc.save(`ficha_${cliente.nome.replace(/\s+/g, '_')}.pdf`);
-            
-            showNotification('PDF do cliente gerado com sucesso!');
         }
         
         // Dar baixa em um cliente específico
@@ -1498,28 +1500,21 @@
                 return;
             }
             
-            const clientes = JSON.parse(localStorage.getItem('clientesCostur')) || [];
-            const clienteIndex = clientes.findIndex(c => c.id === id);
-            
-            if (clienteIndex !== -1) {
-                clientes[clienteIndex].status = 'Baixada';
-                clientes[clienteIndex].dataBaixa = new Date().toISOString();
+            try {
+                const sucesso = await atualizarClienteFirebase(id, {
+                    status: 'Baixada',
+                    dataBaixa: new Date().toISOString()
+                });
                 
-                localStorage.setItem('clientesCostur', JSON.stringify(clientes));
-                carregarHistorico();
-                
-                // Atualizar no Firebase também
-                try {
-                    await atualizarClienteFirebase(id, {
-                        status: 'Baixada',
-                        dataBaixa: new Date().toISOString()
-                    });
-                    console.log("Baixa atualizada no Firebase também");
-                } catch (e) {
-                    console.error("Erro ao atualizar baixa no Firebase: ", e);
+                if (sucesso) {
+                    carregarHistorico();
+                    showNotification('Baixa realizada com sucesso!');
+                } else {
+                    showNotification('Erro ao realizar baixa!', false);
                 }
-                
-                showNotification('Baixa realizada com sucesso!');
+            } catch (e) {
+                console.error("Erro ao dar baixa: ", e);
+                showNotification('Erro ao realizar baixa!', false);
             }
         }
         
@@ -1536,25 +1531,18 @@
                 return;
             }
             
-            const clientes = JSON.parse(localStorage.getItem('clientesCostur')) || [];
-            const clienteIndex = clientes.findIndex(c => c.id === id);
-            
-            if (clienteIndex !== -1) {
-                const clienteNome = clientes[clienteIndex].nome;
-                clientes.splice(clienteIndex, 1);
+            try {
+                const sucesso = await excluirClienteFirebase(id);
                 
-                localStorage.setItem('clientesCostur', JSON.stringify(clientes));
-                carregarHistorico();
-                
-                // Excluir do Firebase também
-                try {
-                    await excluirClienteFirebase(id);
-                    console.log("Cliente excluído do Firebase também");
-                } catch (e) {
-                    console.error("Erro ao excluir do Firebase: ", e);
+                if (sucesso) {
+                    carregarHistorico();
+                    showNotification('Cliente excluído com sucesso!');
+                } else {
+                    showNotification('Erro ao excluir cliente!', false);
                 }
-                
-                showNotification(`Cliente "${clienteNome}" excluído com sucesso!`);
+            } catch (e) {
+                console.error("Erro ao excluir cliente: ", e);
+                showNotification('Erro ao excluir cliente!', false);
             }
         }
         
@@ -1573,7 +1561,7 @@
         document.getElementById('filter-order').addEventListener('change', carregarHistorico);
         
         // Manipular o envio do formulário
-        document.getElementById('clientForm').addEventListener('submit', function(e) {
+        document.getElementById('clientForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             // Validar campos obrigatórios
@@ -1592,18 +1580,28 @@
                 return;
             }
             
-            // Salvar no localStorage
-            const totalClientes = salvarNoLocalStorage();
-            
-            showNotification(`Cliente cadastrado com sucesso! Total de clientes: ${totalClientes}`);
-            
-            // Limpar formulário
-            document.getElementById('clientForm').reset();
-            document.getElementById('dataCadastro').valueAsDate = new Date();
+            try {
+                // Salvar APENAS no Firebase
+                const totalClientes = await salvarCliente();
+                
+                showNotification(`Cliente cadastrado com sucesso! Total de clientes: ${totalClientes}`);
+                
+                // Limpar formulário
+                document.getElementById('clientForm').reset();
+                document.getElementById('dataCadastro').valueAsDate = new Date();
+            } catch (e) {
+                showNotification('Erro ao salvar cliente!', false);
+            }
         });
         
         // Carregar histórico inicialmente (se houver dados)
         carregarHistorico();
+
+        // Disponibilizar funções globalmente
+        window.gerarPDFCliente = gerarPDFCliente;
+        window.darBaixaCliente = darBaixaCliente;
+        window.excluirCliente = excluirCliente;
+        window.carregarHistorico = carregarHistorico;
     </script>
 </body>
 </html>
