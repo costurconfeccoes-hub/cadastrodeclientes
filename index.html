@@ -6,6 +6,28 @@
     <title>Cadastro de Clientes - Costur Confecções</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- FIREBASE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCyTwlzsMG5-l07vnrb8XIx9J6AIP_Xuvw",
+            authDomain: "cadastro-cliente-6bd66.firebaseapp.com",
+            projectId: "cadastro-cliente-6bd66",
+            storageBucket: "cadastro-cliente-6bd66.firebasestorage.app",
+            messagingSenderId: "492238035100",
+            appId: "1:492238035100:web:cfb93092a71798dd2e7559"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.db = db;
+        window.firestore = { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc };
+    </script>
+
     <style>
         * {
             margin: 0;
@@ -900,6 +922,65 @@
     </div>
 
     <script>
+        // Firebase Functions
+        async function salvarClienteFirebase(cliente) {
+            try {
+                const docRef = await window.firestore.addDoc(
+                    window.firestore.collection(window.db, "clientes"), 
+                    cliente
+                );
+                console.log("Cliente salvo no Firebase com ID: ", docRef.id);
+                return docRef.id;
+            } catch (e) {
+                console.error("Erro ao salvar no Firebase: ", e);
+                throw e;
+            }
+        }
+
+        async function carregarClientesFirebase() {
+            try {
+                const querySnapshot = await window.firestore.getDocs(
+                    window.firestore.collection(window.db, "clientes")
+                );
+                const clientes = [];
+                querySnapshot.forEach((doc) => {
+                    clientes.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                return clientes;
+            } catch (e) {
+                console.error("Erro ao carregar do Firebase: ", e);
+                return [];
+            }
+        }
+
+        async function atualizarClienteFirebase(id, dados) {
+            try {
+                const clienteRef = window.firestore.doc(window.db, "clientes", id);
+                await window.firestore.updateDoc(clienteRef, dados);
+                console.log("Cliente atualizado no Firebase");
+                return true;
+            } catch (e) {
+                console.error("Erro ao atualizar no Firebase: ", e);
+                return false;
+            }
+        }
+
+        async function excluirClienteFirebase(id) {
+            try {
+                await window.firestore.deleteDoc(
+                    window.firestore.doc(window.db, "clientes", id)
+                );
+                console.log("Cliente excluído do Firebase");
+                return true;
+            } catch (e) {
+                console.error("Erro ao excluir do Firebase: ", e);
+                return false;
+            }
+        }
+
         // Definir a data atual como padrão para o campo de data de cadastro
         document.getElementById('dataCadastro').valueAsDate = new Date();
         
@@ -1143,8 +1224,8 @@
             showNotification('PDF gerado com sucesso!');
         });
         
-        // Salvar no localStorage
-        function salvarNoLocalStorage() {
+        // Salvar no localStorage E Firebase
+        async function salvarNoLocalStorage() {
             const cliente = {
                 id: Date.now(), // ID único baseado no timestamp
                 nome: document.getElementById('nome').value,
@@ -1160,7 +1241,8 @@
                 cep: document.getElementById('cep').value,
                 observacoes: document.getElementById('observacoes').value,
                 status: 'Ativo', // Status inicial
-                dataBaixa: null // Data de baixa (quando aplicável)
+                dataBaixa: null, // Data de baixa (quando aplicável)
+                timestamp: new Date().toISOString()
             };
             
             // Obter clientes existentes ou criar array vazio
@@ -1172,11 +1254,19 @@
             // Salvar no localStorage
             localStorage.setItem('clientesCostur', JSON.stringify(clientes));
             
+            // Salvar no Firebase também
+            try {
+                await salvarClienteFirebase(cliente);
+                console.log("Cliente salvo no Firebase também");
+            } catch (e) {
+                console.error("Erro ao salvar no Firebase, mas cliente foi salvo localmente: ", e);
+            }
+            
             return clientes.length;
         }
         
-        // Carregar histórico do localStorage
-        function carregarHistorico() {
+        // Carregar histórico do localStorage E Firebase
+        async function carregarHistorico() {
             const clientes = JSON.parse(localStorage.getItem('clientesCostur')) || [];
             const tbody = document.getElementById('history-table-body');
             const filterStatus = document.getElementById('filter-status').value;
@@ -1400,7 +1490,7 @@
         }
         
         // Dar baixa em um cliente específico
-        function darBaixaCliente(id) {
+        async function darBaixaCliente(id) {
             const senha = prompt('Digite a senha de administrador para dar baixa:');
             
             if (senha !== 'CosturADM2023') {
@@ -1418,12 +1508,23 @@
                 localStorage.setItem('clientesCostur', JSON.stringify(clientes));
                 carregarHistorico();
                 
+                // Atualizar no Firebase também
+                try {
+                    await atualizarClienteFirebase(id, {
+                        status: 'Baixada',
+                        dataBaixa: new Date().toISOString()
+                    });
+                    console.log("Baixa atualizada no Firebase também");
+                } catch (e) {
+                    console.error("Erro ao atualizar baixa no Firebase: ", e);
+                }
+                
                 showNotification('Baixa realizada com sucesso!');
             }
         }
         
         // Excluir um cliente
-        function excluirCliente(id) {
+        async function excluirCliente(id) {
             const senha = prompt('Digite a senha de administrador para excluir o cliente:');
             
             if (senha !== 'CosturADM2023') {
@@ -1444,6 +1545,14 @@
                 
                 localStorage.setItem('clientesCostur', JSON.stringify(clientes));
                 carregarHistorico();
+                
+                // Excluir do Firebase também
+                try {
+                    await excluirClienteFirebase(id);
+                    console.log("Cliente excluído do Firebase também");
+                } catch (e) {
+                    console.error("Erro ao excluir do Firebase: ", e);
+                }
                 
                 showNotification(`Cliente "${clienteNome}" excluído com sucesso!`);
             }
