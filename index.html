@@ -1066,7 +1066,6 @@
                 senhaBaixa.value = '';
                 
                 showNotification('Baixa realizada com sucesso!');
-                // Aqui você pode adicionar a lógica para dar baixa no cliente
             } else {
                 showNotification('Senha incorreta!', false);
                 senhaBaixa.focus();
@@ -1259,7 +1258,7 @@
             }
         }
         
-        // Carregar histórico APENAS do Firebase - FUNÇÃO CORRIGIDA
+        // Carregar histórico APENAS do Firebase
         async function carregarHistorico() {
             try {
                 const clientes = await carregarClientesFirebase();
@@ -1498,7 +1497,7 @@
             }
         }
         
-        // Dar baixa em um cliente específico - FUNÇÃO CORRIGIDA
+        // Dar baixa em um cliente específico
         async function darBaixaCliente(id) {
             const senha = prompt('Digite a senha de administrador para dar baixa:');
             
@@ -1508,8 +1507,6 @@
             }
             
             try {
-                console.log("Tentando dar baixa no cliente ID:", id);
-                
                 const sucesso = await atualizarClienteFirebase(id, {
                     status: 'Baixada',
                     dataBaixa: new Date().toISOString()
@@ -1517,10 +1514,9 @@
                 
                 if (sucesso) {
                     showNotification('Baixa realizada com sucesso!');
-                    // Recarregar o histórico para mostrar a atualização
                     carregarHistorico();
                 } else {
-                    showNotification('Erro ao realizar baixa no Firebase!', false);
+                    showNotification('Erro ao realizar baixa!', false);
                 }
             } catch (e) {
                 console.error("Erro ao dar baixa:", e);
@@ -1528,7 +1524,7 @@
             }
         }
         
-        // Excluir um cliente - FUNÇÃO CORRIGIDA
+        // Excluir um cliente
         async function excluirCliente(id) {
             const senha = prompt('Digite a senha de administrador para excluir o cliente:');
             
@@ -1542,16 +1538,13 @@
             }
             
             try {
-                console.log("Tentando excluir cliente ID:", id);
-                
                 const sucesso = await excluirClienteFirebase(id);
                 
                 if (sucesso) {
                     showNotification('Cliente excluído com sucesso!');
-                    // Recarregar o histórico para remover o cliente da lista
                     carregarHistorico();
                 } else {
-                    showNotification('Erro ao excluir cliente do Firebase!', false);
+                    showNotification('Erro ao excluir cliente!', false);
                 }
             } catch (e) {
                 console.error("Erro ao excluir cliente:", e);
@@ -1559,7 +1552,7 @@
             }
         }
         
-        // Função para editar cliente - NOVA FUNÇÃO ADICIONADA
+        // Função para editar cliente
         async function editarCliente(id) {
             try {
                 const clientes = await carregarClientesFirebase();
@@ -1619,7 +1612,7 @@
         document.getElementById('filter-status').addEventListener('change', carregarHistorico);
         document.getElementById('filter-order').addEventListener('change', carregarHistorico);
         
-        // Manipular o envio do formulário - FUNÇÃO CORRIGIDA
+        // Manipular o envio do formulário
         document.getElementById('clientForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
