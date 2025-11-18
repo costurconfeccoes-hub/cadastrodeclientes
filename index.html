@@ -33,6 +33,7 @@
             background-color: #f9f9f9;
             color: var(--text);
             line-height: 1.6;
+            min-width: 1024px;
         }
 
         .container {
@@ -263,36 +264,6 @@
             justify-content: center;
         }
 
-        .btn-pdf {
-            background: var(--danger-color);
-            padding: 12px 25px;
-            font-size: 1rem;
-            width: auto;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .btn-history {
-            background: var(--warning-color);
-            padding: 12px 25px;
-            font-size: 1rem;
-            width: auto;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .btn-baixa {
-            background: var(--admin-color);
-            padding: 12px 25px;
-            font-size: 1rem;
-            width: auto;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
         .form-row {
             display: flex;
             gap: 15px;
@@ -363,8 +334,26 @@
             font-weight: 600;
         }
 
-        .status-baixada {
+        .status-inativo {
+            background: var(--warning-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-bloqueado {
             background: var(--danger-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-cancelado {
+            background: #7f8c8d;
             color: white;
             padding: 5px 10px;
             border-radius: 20px;
@@ -383,18 +372,13 @@
             transition: all 0.3s;
         }
 
-        .btn-pdf-small {
-            background: var(--danger-color);
+        .btn-ver {
+            background: var(--secondary);
             color: white;
         }
 
         .btn-baixa-small {
             background: var(--warning-color);
-            color: white;
-        }
-
-        .btn-excluir-small {
-            background: var(--danger-color);
             color: white;
         }
 
@@ -572,69 +556,18 @@
             display: none;
         }
 
+        /* Remover responsividade */
         @media (max-width: 768px) {
-            .form-row {
-                flex-direction: column;
-            }
-
-            .history-header {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .history-controls {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .filters {
-                flex-direction: column;
-            }
-
-            .header-content {
-                flex-direction: column;
-                text-align: center;
-                gap: 15px;
-            }
-
-            .header-contact {
-                align-items: center;
-            }
-
-            .hero h2 {
-                font-size: 2rem;
-            }
-
-            .hero p {
-                font-size: 1rem;
-            }
-
-            .footer-content {
-                grid-template-columns: 1fr;
-                text-align: center;
+            body {
+                min-width: 1024px;
+                overflow-x: auto;
             }
         }
 
         @media (max-width: 480px) {
-            .logo-container {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .logo-text h1 {
-                font-size: 1.3rem;
-            }
-
-            .logo-text p {
-                font-size: 0.8rem;
-            }
-
-            .contact-item {
-                font-size: 0.8rem;
-            }
-
-            .section-title h2 {
-                font-size: 1.8rem;
+            body {
+                min-width: 1024px;
+                overflow-x: auto;
             }
         }
     </style>
@@ -684,9 +617,16 @@
             <div class="card">
                 <h2><i class="fas fa-user-plus"></i> Dados do Cliente</h2>
                 <form id="clientForm">
-                    <div class="form-group">
-                        <label for="nome" class="required"><i class="fas fa-user"></i> Nome Completo</label>
-                        <input type="text" id="nome" name="nome" required placeholder="Digite o nome completo do cliente">
+                    <div class="form-row">
+                        <div class="form-group form-group-small">
+                            <label for="idCliente"><i class="fas fa-id-card"></i> ID do Cliente</label>
+                            <input type="text" id="idCliente" name="idCliente" readonly>
+                        </div>
+                        
+                        <div class="form-group form-group-large">
+                            <label for="nome" class="required"><i class="fas fa-user"></i> Nome Completo</label>
+                            <input type="text" id="nome" name="nome" required placeholder="Digite o nome completo do cliente">
+                        </div>
                     </div>
                     
                     <div class="form-row">
@@ -710,6 +650,27 @@
                         <div class="form-group form-group-medium">
                             <label for="telefone" class="required"><i class="fas fa-phone"></i> Telefone</label>
                             <input type="tel" id="telefone" name="telefone" required placeholder="(00) 00000-0000">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group form-group-medium">
+                            <label for="status" class="required"><i class="fas fa-info-circle"></i> Status do Cadastro</label>
+                            <select id="status" name="status" required>
+                                <option value="Ativo">Ativo</option>
+                                <option value="Inativo">Inativo</option>
+                                <option value="Bloqueado">Bloqueado</option>
+                                <option value="Cancelado">Cancelado</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group form-group-medium">
+                            <label for="cadastradoPor" class="required"><i class="fas fa-user-edit"></i> Cadastrado Por</label>
+                            <select id="cadastradoPor" name="cadastradoPor" required>
+                                <option value="">Selecione quem cadastrou</option>
+                                <option value="Wallison Vinicius">Wallison Vinicius</option>
+                                <option value="Eduarda Emmanoelly">Eduarda Emmanoelly</option>
+                            </select>
                         </div>
                     </div>
                     
@@ -787,40 +748,34 @@
                     </div>
                     
                     <div style="display: flex; gap: 15px; margin-top: 30px; flex-wrap: wrap;">
-                        <button type="button" class="btn-pdf" id="btn-pdf">
-                            <i class="fas fa-file-pdf"></i> Baixar PDF
-                        </button>
-                        <button type="button" class="btn-history" id="btn-history">
-                            <i class="fas fa-history"></i> Ver Histórico
-                        </button>
-                        <button type="button" class="btn-baixa" id="btn-baixa">
-                            <i class="fas fa-file-export"></i> Dar Baixa
-                        </button>
                         <button type="submit" class="btn-save">
                             <i class="fas fa-save"></i> Salvar Cadastro
                         </button>
                     </div>
                 </form>
             </div>
+        </div>
+    </section>
 
-            <div class="card history-section hidden" id="history-section">
+    <!-- Histórico de Clientes -->
+    <section id="historico">
+        <div class="container">
+            <div class="section-title">
+                <h2>Histórico de Clientes</h2>
+            </div>
+            
+            <div class="card history-section">
                 <div class="history-header">
-                    <h2><i class="fas fa-history"></i> Histórico de Clientes</h2>
-                    <div class="history-controls">
-                        <button type="button" class="btn-pdf" id="btn-export-all">
-                            <i class="fas fa-file-export"></i> Exportar Tudo
-                        </button>
-                        <button type="button" class="btn-history" id="btn-back-form">
-                            <i class="fas fa-arrow-left"></i> Voltar ao Cadastro
-                        </button>
-                    </div>
+                    <h2><i class="fas fa-history"></i> Clientes Cadastrados</h2>
                 </div>
                 
                 <div class="filters">
                     <select class="filter-select" id="filter-status">
                         <option value="todos">Todos os Status</option>
-                        <option value="ativo">Ativo</option>
-                        <option value="baixada">Baixada</option>
+                        <option value="Ativo">Ativo</option>
+                        <option value="Inativo">Inativo</option>
+                        <option value="Bloqueado">Bloqueado</option>
+                        <option value="Cancelado">Cancelado</option>
                     </select>
                     
                     <select class="filter-select" id="filter-order">
@@ -834,10 +789,12 @@
                     <table class="history-table" id="history-table">
                         <thead>
                             <tr>
+                                <th>ID</th>
                                 <th>Nome</th>
                                 <th>Telefone</th>
                                 <th>Data Cadastro</th>
                                 <th>Status</th>
+                                <th>Cadastrado Por</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
@@ -900,8 +857,31 @@
     </div>
 
     <script>
-        // Definir a data atual como padrão para o campo de data de cadastro
-        document.getElementById('dataCadastro').valueAsDate = new Date();
+        // Função para gerar ID aleatório (4 números + 8 letras)
+        function gerarID() {
+            const numeros = '0123456789';
+            const letras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let id = '';
+            
+            // Gerar 4 números
+            for (let i = 0; i < 4; i++) {
+                id += numeros.charAt(Math.floor(Math.random() * numeros.length));
+            }
+            
+            // Gerar 8 letras
+            for (let i = 0; i < 8; i++) {
+                id += letras.charAt(Math.floor(Math.random() * letras.length));
+            }
+            
+            return id;
+        }
+        
+        // Definir ID do cliente ao carregar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('idCliente').value = gerarID();
+            document.getElementById('dataCadastro').valueAsDate = new Date();
+            carregarHistorico();
+        });
         
         // Formatar telefone
         document.getElementById('telefone').addEventListener('input', function(e) {
@@ -947,54 +927,6 @@
             }, 3000);
         }
         
-        // Modal para dar baixa
-        const modalBaixa = document.getElementById('modal-baixa');
-        const btnBaixa = document.getElementById('btn-baixa');
-        const cancelarBaixa = document.getElementById('cancelar-baixa');
-        const confirmarBaixa = document.getElementById('confirmar-baixa');
-        const senhaBaixa = document.getElementById('senha-baixa');
-        
-        btnBaixa.addEventListener('click', function() {
-            const nome = document.getElementById('nome').value;
-            
-            if (!nome) {
-                showNotification('Preencha o nome do cliente antes de dar baixa!', false);
-                return;
-            }
-            
-            modalBaixa.style.display = 'flex';
-            senhaBaixa.focus();
-        });
-        
-        cancelarBaixa.addEventListener('click', function() {
-            modalBaixa.style.display = 'none';
-            senhaBaixa.value = '';
-        });
-        
-        confirmarBaixa.addEventListener('click', function() {
-            const senha = senhaBaixa.value;
-            const senhaCorreta = 'CosturADM2023';
-            
-            if (senha === senhaCorreta) {
-                modalBaixa.style.display = 'none';
-                senhaBaixa.value = '';
-                
-                showNotification('Baixa realizada com sucesso!');
-                // Aqui você pode adicionar a lógica para dar baixa no cliente
-            } else {
-                showNotification('Senha incorreta!', false);
-                senhaBaixa.focus();
-            }
-        });
-        
-        // Fechar modal ao clicar fora
-        window.addEventListener('click', function(e) {
-            if (e.target === modalBaixa) {
-                modalBaixa.style.display = 'none';
-                senhaBaixa.value = '';
-            }
-        });
-        
         // Função para formatar data no formato DD/MM/AAAA
         function formatarData(data) {
             if (!data) return 'Não informado';
@@ -1009,149 +941,17 @@
             return `${dia}/${mes}/${ano}`;
         }
         
-        // Gerar PDF do formulário atual
-        document.getElementById('btn-pdf').addEventListener('click', function() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            // Cores para o PDF
-            const primaryColor = [44, 62, 80];
-            const secondaryColor = [52, 152, 219];
-            
-            // Cabeçalho
-            doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-            doc.rect(0, 0, 210, 35, 'F');
-            
-            // Título
-            doc.setFontSize(20);
-            doc.setTextColor(255, 255, 255);
-            doc.text('COSTUR CONFECÇÕES', 105, 15, { align: 'center' });
-            
-            doc.setFontSize(14);
-            doc.setTextColor(255, 255, 255);
-            doc.text('Cadastro de Cliente', 105, 25, { align: 'center' });
-            
-            // Linha decorativa
-            doc.setDrawColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
-            doc.setLineWidth(2);
-            doc.line(20, 40, 190, 40);
-            
-            let y = 55;
-            
-            // Seção de Dados Pessoais
-            doc.setFontSize(16);
-            doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-            doc.text('DADOS PESSOAIS', 20, y);
-            y += 10;
-            
-            doc.setFontSize(10);
-            doc.setTextColor(0, 0, 0);
-            
-            // Nome
-            doc.setFont(undefined, 'bold');
-            doc.text('Nome Completo:', 20, y);
-            doc.setFont(undefined, 'normal');
-            doc.text(document.getElementById('nome').value || 'Não informado', 60, y);
-            y += 8;
-            
-            // Marca
-            doc.setFont(undefined, 'bold');
-            doc.text('Marca:', 20, y);
-            doc.setFont(undefined, 'normal');
-            doc.text(document.getElementById('marca').value || 'Não informado', 60, y);
-            y += 8;
-            
-            // Data de Nascimento
-            doc.setFont(undefined, 'bold');
-            doc.text('Data de Nascimento:', 20, y);
-            doc.setFont(undefined, 'normal');
-            doc.text(formatarData(document.getElementById('dataNascimento').value), 70, y);
-            y += 8;
-            
-            // Data de Cadastro
-            doc.setFont(undefined, 'bold');
-            doc.text('Data de Cadastro:', 20, y);
-            doc.setFont(undefined, 'normal');
-            doc.text(formatarData(document.getElementById('dataCadastro').value), 70, y);
-            y += 8;
-            
-            // Telefone
-            doc.setFont(undefined, 'bold');
-            doc.text('Telefone:', 20, y);
-            doc.setFont(undefined, 'normal');
-            doc.text(document.getElementById('telefone').value || 'Não informado', 60, y);
-            y += 15;
-            
-            // Seção de Endereço
-            doc.setFontSize(16);
-            doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-            doc.text('ENDEREÇO', 20, y);
-            y += 10;
-            
-            doc.setFontSize(10);
-            doc.setTextColor(0, 0, 0);
-            
-            const endereco = [
-                `Rua: ${document.getElementById('rua').value || 'Não informado'}`,
-                `Número: ${document.getElementById('numero').value || 'Não informado'}`,
-                `Bairro: ${document.getElementById('bairro').value || 'Não informado'}`,
-                `Cidade: ${document.getElementById('cidade').value || 'Não informado'}`,
-                `Estado: ${document.getElementById('estado').value || 'Não informado'}`,
-                `CEP: ${document.getElementById('cep').value || 'Não informado'}`
-            ];
-            
-            endereco.forEach(linha => {
-                doc.text(linha, 25, y);
-                y += 6;
-            });
-            
-            y += 8;
-            
-            // Seção de Observações
-            const observacoes = document.getElementById('observacoes').value;
-            if (observacoes) {
-                doc.setFontSize(16);
-                doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-                doc.text('OBSERVAÇÕES', 20, y);
-                y += 10;
-                
-                doc.setFontSize(10);
-                doc.setTextColor(0, 0, 0);
-                
-                const splitObservacoes = doc.splitTextToSize(observacoes, 170);
-                doc.text(splitObservacoes, 25, y);
-                y += splitObservacoes.length * 4;
-            }
-            
-            // Rodapé
-            const now = new Date();
-            const dataHora = now.toLocaleString('pt-BR');
-            
-            doc.setFontSize(8);
-            doc.setTextColor(150, 150, 150);
-            doc.text(`Documento gerado em: ${dataHora}`, 105, 285, { align: 'center' });
-            
-            // Linha decorativa no rodapé
-            doc.setDrawColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
-            doc.setLineWidth(1);
-            doc.line(20, 275, 190, 275);
-            
-            // Salvar PDF
-            const nomeCliente = document.getElementById('nome').value || 'cliente';
-            doc.save(`cadastro_${nomeCliente.replace(/\s+/g, '_')}.pdf`);
-            
-            showNotification('PDF gerado com sucesso!');
-        });
-        
         // Salvar no localStorage
         function salvarNoLocalStorage() {
             const cliente = {
-                id: Date.now(), // ID único baseado no timestamp
+                id: document.getElementById('idCliente').value,
                 nome: document.getElementById('nome').value,
                 marca: document.getElementById('marca').value,
                 dataNascimento: document.getElementById('dataNascimento').value,
                 dataCadastro: document.getElementById('dataCadastro').value,
                 telefone: document.getElementById('telefone').value,
+                status: document.getElementById('status').value,
+                cadastradoPor: document.getElementById('cadastradoPor').value,
                 rua: document.getElementById('rua').value,
                 numero: document.getElementById('numero').value,
                 bairro: document.getElementById('bairro').value,
@@ -1159,8 +959,7 @@
                 estado: document.getElementById('estado').value,
                 cep: document.getElementById('cep').value,
                 observacoes: document.getElementById('observacoes').value,
-                status: 'Ativo', // Status inicial
-                dataBaixa: null // Data de baixa (quando aplicável)
+                dataBaixa: null
             };
             
             // Obter clientes existentes ou criar array vazio
@@ -1186,7 +985,7 @@
             tbody.innerHTML = '';
             
             if (clientes.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum cliente cadastrado</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Nenhum cliente cadastrado</td></tr>';
                 return;
             }
             
@@ -1195,7 +994,7 @@
             
             if (filterStatus !== 'todos') {
                 clientesFiltrados = clientesFiltrados.filter(cliente => 
-                    cliente.status.toLowerCase() === filterStatus.toLowerCase()
+                    cliente.status === filterStatus
                 );
             }
             
@@ -1215,23 +1014,26 @@
                 // Formatar data no formato DD/MM/AAAA
                 const dataCadastro = formatarData(cliente.dataCadastro);
                 
+                // Definir classe de status
+                let statusClass = '';
+                if (cliente.status === 'Ativo') statusClass = 'status-ativo';
+                else if (cliente.status === 'Inativo') statusClass = 'status-inativo';
+                else if (cliente.status === 'Bloqueado') statusClass = 'status-bloqueado';
+                else if (cliente.status === 'Cancelado') statusClass = 'status-cancelado';
+                
                 tr.innerHTML = `
+                    <td>${cliente.id}</td>
                     <td>${cliente.nome}</td>
                     <td>${cliente.telefone}</td>
                     <td>${dataCadastro}</td>
-                    <td><span class="${cliente.status === 'Ativo' ? 'status-ativo' : 'status-baixada'}">${cliente.status}</span></td>
+                    <td><span class="${statusClass}">${cliente.status}</span></td>
+                    <td>${cliente.cadastradoPor}</td>
                     <td>
-                        <button class="action-btn btn-pdf-small" onclick="gerarPDFCliente(${cliente.id})">
-                            <i class="fas fa-file-pdf"></i> PDF
+                        <button class="action-btn btn-ver" onclick="verCadastroCliente('${cliente.id}')">
+                            <i class="fas fa-eye"></i> Ver
                         </button>
-                        ${cliente.status === 'Ativo' ? 
-                            `<button class="action-btn btn-baixa-small" onclick="darBaixaCliente(${cliente.id})">
-                                <i class="fas fa-file-export"></i> Baixa
-                            </button>` : 
-                            ''
-                        }
-                        <button class="action-btn btn-excluir-small" onclick="excluirCliente(${cliente.id})">
-                            <i class="fas fa-trash"></i> Excluir
+                        <button class="action-btn btn-baixa-small" onclick="darBaixaCliente('${cliente.id}')">
+                            <i class="fas fa-file-export"></i> Baixa
                         </button>
                     </td>
                 `;
@@ -1240,8 +1042,8 @@
             });
         }
         
-        // Gerar PDF para um cliente específico
-        function gerarPDFCliente(id) {
+        // Ver cadastro de um cliente específico
+        function verCadastroCliente(id) {
             const clientes = JSON.parse(localStorage.getItem('clientesCostur')) || [];
             const cliente = clientes.find(c => c.id === id);
             
@@ -1250,153 +1052,216 @@
                 return;
             }
             
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            // Gerar imagem do cadastro
+            gerarImagemCadastro(cliente);
+        }
+        
+        // Gerar imagem do cadastro
+        function gerarImagemCadastro(cliente) {
+            // Criar um canvas para gerar a imagem
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
             
-            // Cores para o PDF
-            const primaryColor = [44, 62, 80];
-            const secondaryColor = [52, 152, 219];
-            const successColor = [46, 204, 113];
-            const dangerColor = [231, 76, 60];
+            // Configurar o canvas
+            canvas.width = 800;
+            canvas.height = 1000;
+            
+            // Cor de fundo
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Cores
+            const primaryColor = '#2c3e50';
+            const secondaryColor = '#3498db';
+            const textColor = '#333333';
             
             // Cabeçalho
-            doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-            doc.rect(0, 0, 210, 35, 'F');
+            ctx.fillStyle = primaryColor;
+            ctx.fillRect(0, 0, canvas.width, 80);
             
             // Título
-            doc.setFontSize(20);
-            doc.setTextColor(255, 255, 255);
-            doc.text('COSTUR CONFECÇÕES', 105, 15, { align: 'center' });
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('COSTUR CONFECÇÕES', canvas.width / 2, 35);
             
-            doc.setFontSize(14);
-            doc.setTextColor(255, 255, 255);
-            doc.text('Ficha do Cliente', 105, 25, { align: 'center' });
+            ctx.font = '18px Arial';
+            ctx.fillText('Ficha do Cliente', canvas.width / 2, 60);
             
             // Linha decorativa
-            doc.setDrawColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
-            doc.setLineWidth(2);
-            doc.line(20, 40, 190, 40);
+            ctx.strokeStyle = secondaryColor;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(50, 90);
+            ctx.lineTo(canvas.width - 50, 90);
+            ctx.stroke();
             
-            let y = 55;
+            let y = 130;
             
-            // Status do cliente
-            doc.setFontSize(12);
-            if (cliente.status === 'Ativo') {
-                doc.setTextColor(successColor[0], successColor[1], successColor[2]);
-            } else {
-                doc.setTextColor(dangerColor[0], dangerColor[1], dangerColor[2]);
-            }
-            doc.text(`STATUS: ${cliente.status}`, 20, y);
-            y += 10;
+            // ID do Cliente
+            ctx.fillStyle = textColor;
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('ID DO CLIENTE:', 50, y);
+            ctx.font = '16px Arial';
+            ctx.fillText(cliente.id, 180, y);
+            y += 30;
+            
+            // Status
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText('STATUS:', 50, y);
+            ctx.font = '16px Arial';
+            ctx.fillText(cliente.status, 180, y);
+            y += 40;
             
             // Seção de Dados Pessoais
-            doc.setFontSize(16);
-            doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-            doc.text('DADOS PESSOAIS', 20, y);
-            y += 10;
+            ctx.fillStyle = primaryColor;
+            ctx.font = 'bold 20px Arial';
+            ctx.fillText('DADOS PESSOAIS', 50, y);
+            y += 30;
             
-            doc.setFontSize(10);
-            doc.setTextColor(0, 0, 0);
+            ctx.fillStyle = textColor;
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('Nome Completo:', 50, y);
+            ctx.font = '14px Arial';
+            ctx.fillText(cliente.nome || 'Não informado', 180, y);
+            y += 25;
             
-            // Nome
-            doc.setFont(undefined, 'bold');
-            doc.text('Nome Completo:', 20, y);
-            doc.setFont(undefined, 'normal');
-            doc.text(cliente.nome || 'Não informado', 60, y);
-            y += 8;
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('Marca:', 50, y);
+            ctx.font = '14px Arial';
+            ctx.fillText(cliente.marca || 'Não informado', 180, y);
+            y += 25;
             
-            // Marca
-            doc.setFont(undefined, 'bold');
-            doc.text('Marca:', 20, y);
-            doc.setFont(undefined, 'normal');
-            doc.text(cliente.marca || 'Não informado', 60, y);
-            y += 8;
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('Data de Nascimento:', 50, y);
+            ctx.font = '14px Arial';
+            ctx.fillText(formatarData(cliente.dataNascimento), 180, y);
+            y += 25;
             
-            // Data de Nascimento
-            doc.setFont(undefined, 'bold');
-            doc.text('Data de Nascimento:', 20, y);
-            doc.setFont(undefined, 'normal');
-            doc.text(formatarData(cliente.dataNascimento), 70, y);
-            y += 8;
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('Data de Cadastro:', 50, y);
+            ctx.font = '14px Arial';
+            ctx.fillText(formatarData(cliente.dataCadastro), 180, y);
+            y += 25;
             
-            // Data de Cadastro
-            doc.setFont(undefined, 'bold');
-            doc.text('Data de Cadastro:', 20, y);
-            doc.setFont(undefined, 'normal');
-            doc.text(formatarData(cliente.dataCadastro), 70, y);
-            y += 8;
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('Telefone:', 50, y);
+            ctx.font = '14px Arial';
+            ctx.fillText(cliente.telefone || 'Não informado', 180, y);
+            y += 25;
             
-            // Telefone
-            doc.setFont(undefined, 'bold');
-            doc.text('Telefone:', 20, y);
-            doc.setFont(undefined, 'normal');
-            doc.text(cliente.telefone || 'Não informado', 60, y);
-            y += 15;
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('Cadastrado Por:', 50, y);
+            ctx.font = '14px Arial';
+            ctx.fillText(cliente.cadastradoPor || 'Não informado', 180, y);
+            y += 40;
             
             // Seção de Endereço
-            doc.setFontSize(16);
-            doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-            doc.text('ENDEREÇO', 20, y);
-            y += 10;
+            ctx.fillStyle = primaryColor;
+            ctx.font = 'bold 20px Arial';
+            ctx.fillText('ENDEREÇO', 50, y);
+            y += 30;
             
-            doc.setFontSize(10);
-            doc.setTextColor(0, 0, 0);
+            ctx.fillStyle = textColor;
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('Rua:', 50, y);
+            ctx.font = '14px Arial';
+            ctx.fillText(cliente.rua || 'Não informado', 180, y);
+            y += 25;
             
-            const endereco = [
-                `Rua: ${cliente.rua || 'Não informado'}`,
-                `Número: ${cliente.numero || 'Não informado'}`,
-                `Bairro: ${cliente.bairro || 'Não informado'}`,
-                `Cidade: ${cliente.cidade || 'Não informado'}`,
-                `Estado: ${cliente.estado || 'Não informado'}`,
-                `CEP: ${cliente.cep || 'Não informado'}`
-            ];
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('Número:', 50, y);
+            ctx.font = '14px Arial';
+            ctx.fillText(cliente.numero || 'Não informado', 180, y);
+            y += 25;
             
-            endereco.forEach(linha => {
-                doc.text(linha, 25, y);
-                y += 6;
-            });
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('Bairro:', 50, y);
+            ctx.font = '14px Arial';
+            ctx.fillText(cliente.bairro || 'Não informado', 180, y);
+            y += 25;
             
-            y += 8;
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('Cidade:', 50, y);
+            ctx.font = '14px Arial';
+            ctx.fillText(cliente.cidade || 'Não informado', 180, y);
+            y += 25;
+            
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('Estado:', 50, y);
+            ctx.font = '14px Arial';
+            ctx.fillText(cliente.estado || 'Não informado', 180, y);
+            y += 25;
+            
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('CEP:', 50, y);
+            ctx.font = '14px Arial';
+            ctx.fillText(cliente.cep || 'Não informado', 180, y);
+            y += 40;
             
             // Seção de Observações
             if (cliente.observacoes) {
-                doc.setFontSize(16);
-                doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-                doc.text('OBSERVAÇÕES', 20, y);
-                y += 10;
+                ctx.fillStyle = primaryColor;
+                ctx.font = 'bold 20px Arial';
+                ctx.fillText('OBSERVAÇÕES', 50, y);
+                y += 30;
                 
-                doc.setFontSize(10);
-                doc.setTextColor(0, 0, 0);
+                ctx.fillStyle = textColor;
+                ctx.font = '14px Arial';
                 
-                const splitObservacoes = doc.splitTextToSize(cliente.observacoes, 170);
-                doc.text(splitObservacoes, 25, y);
-                y += splitObservacoes.length * 4;
-            }
-            
-            // Data da Baixa (se aplicável)
-            if (cliente.status === 'Baixada' && cliente.dataBaixa) {
-                doc.setFontSize(12);
-                doc.setTextColor(dangerColor[0], dangerColor[1], dangerColor[2]);
-                doc.text(`Data da Baixa: ${formatarData(cliente.dataBaixa)}`, 20, y + 10);
+                // Quebrar texto em várias linhas
+                const observacoes = cliente.observacoes;
+                const maxWidth = 700;
+                const lineHeight = 20;
+                const words = observacoes.split(' ');
+                let line = '';
+                let testLine = '';
+                
+                for (let i = 0; i < words.length; i++) {
+                    testLine = line + words[i] + ' ';
+                    const metrics = ctx.measureText(testLine);
+                    const testWidth = metrics.width;
+                    
+                    if (testWidth > maxWidth && i > 0) {
+                        ctx.fillText(line, 50, y);
+                        line = words[i] + ' ';
+                        y += lineHeight;
+                    } else {
+                        line = testLine;
+                    }
+                }
+                ctx.fillText(line, 50, y);
+                y += lineHeight;
             }
             
             // Rodapé
             const now = new Date();
             const dataHora = now.toLocaleString('pt-BR');
             
-            doc.setFontSize(8);
-            doc.setTextColor(150, 150, 150);
-            doc.text(`Documento gerado em: ${dataHora}`, 105, 285, { align: 'center' });
+            ctx.fillStyle = '#999999';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`Documento gerado em: ${dataHora}`, canvas.width / 2, canvas.height - 30);
             
             // Linha decorativa no rodapé
-            doc.setDrawColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
-            doc.setLineWidth(1);
-            doc.line(20, 275, 190, 275);
+            ctx.strokeStyle = secondaryColor;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(50, canvas.height - 50);
+            ctx.lineTo(canvas.width - 50, canvas.height - 50);
+            ctx.stroke();
             
-            // Salvar PDF
-            doc.save(`ficha_${cliente.nome.replace(/\s+/g, '_')}.pdf`);
+            // Converter canvas para imagem e fazer download
+            const dataURL = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = `cadastro_${cliente.nome.replace(/\s+/g, '_')}.png`;
+            link.href = dataURL;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
             
-            showNotification('PDF do cliente gerado com sucesso!');
+            showNotification('Imagem do cadastro gerada com sucesso!');
         }
         
         // Dar baixa em um cliente específico
@@ -1412,7 +1277,7 @@
             const clienteIndex = clientes.findIndex(c => c.id === id);
             
             if (clienteIndex !== -1) {
-                clientes[clienteIndex].status = 'Baixada';
+                clientes[clienteIndex].status = 'Inativo';
                 clientes[clienteIndex].dataBaixa = new Date().toISOString();
                 
                 localStorage.setItem('clientesCostur', JSON.stringify(clientes));
@@ -1421,43 +1286,6 @@
                 showNotification('Baixa realizada com sucesso!');
             }
         }
-        
-        // Excluir um cliente
-        function excluirCliente(id) {
-            const senha = prompt('Digite a senha de administrador para excluir o cliente:');
-            
-            if (senha !== 'CosturADM2023') {
-                showNotification('Senha incorreta!', false);
-                return;
-            }
-            
-            if (!confirm('Tem certeza que deseja excluir este cliente? Esta ação não pode ser desfeita.')) {
-                return;
-            }
-            
-            const clientes = JSON.parse(localStorage.getItem('clientesCostur')) || [];
-            const clienteIndex = clientes.findIndex(c => c.id === id);
-            
-            if (clienteIndex !== -1) {
-                const clienteNome = clientes[clienteIndex].nome;
-                clientes.splice(clienteIndex, 1);
-                
-                localStorage.setItem('clientesCostur', JSON.stringify(clientes));
-                carregarHistorico();
-                
-                showNotification(`Cliente "${clienteNome}" excluído com sucesso!`);
-            }
-        }
-        
-        // Alternar entre formulário e histórico
-        document.getElementById('btn-history').addEventListener('click', function() {
-            document.getElementById('history-section').classList.remove('hidden');
-            carregarHistorico();
-        });
-        
-        document.getElementById('btn-back-form').addEventListener('click', function() {
-            document.getElementById('history-section').classList.add('hidden');
-        });
         
         // Filtros
         document.getElementById('filter-status').addEventListener('change', carregarHistorico);
@@ -1471,6 +1299,8 @@
             const nome = document.getElementById('nome').value;
             const dataCadastro = document.getElementById('dataCadastro').value;
             const telefone = document.getElementById('telefone').value;
+            const status = document.getElementById('status').value;
+            const cadastradoPor = document.getElementById('cadastradoPor').value;
             const rua = document.getElementById('rua').value;
             const numero = document.getElementById('numero').value;
             const bairro = document.getElementById('bairro').value;
@@ -1478,7 +1308,7 @@
             const estado = document.getElementById('estado').value;
             const cep = document.getElementById('cep').value;
             
-            if (!nome || !dataCadastro || !telefone || !rua || !numero || !bairro || !cidade || !estado || !cep) {
+            if (!nome || !dataCadastro || !telefone || !status || !cadastradoPor || !rua || !numero || !bairro || !cidade || !estado || !cep) {
                 showNotification('Preencha todos os campos obrigatórios!', false);
                 return;
             }
@@ -1488,13 +1318,14 @@
             
             showNotification(`Cliente cadastrado com sucesso! Total de clientes: ${totalClientes}`);
             
-            // Limpar formulário
+            // Limpar formulário e gerar novo ID
             document.getElementById('clientForm').reset();
+            document.getElementById('idCliente').value = gerarID();
             document.getElementById('dataCadastro').valueAsDate = new Date();
+            
+            // Atualizar histórico
+            carregarHistorico();
         });
-        
-        // Carregar histórico inicialmente (se houver dados)
-        carregarHistorico();
     </script>
 </body>
 </html>
