@@ -927,65 +927,6 @@
     </div>
 
     <script>
-        // Firebase Functions
-        async function salvarClienteFirebase(cliente) {
-            try {
-                const docRef = await window.firestore.addDoc(
-                    window.firestore.collection(window.db, "clientes"), 
-                    cliente
-                );
-                console.log("Cliente salvo no Firebase com ID: ", docRef.id);
-                return docRef.id;
-            } catch (e) {
-                console.error("Erro ao salvar no Firebase: ", e);
-                throw e;
-            }
-        }
-
-        async function carregarClientesFirebase() {
-            try {
-                const querySnapshot = await window.firestore.getDocs(
-                    window.firestore.collection(window.db, "clientes")
-                );
-                const clientes = [];
-                querySnapshot.forEach((doc) => {
-                    clientes.push({
-                        id: doc.id,
-                        ...doc.data()
-                    });
-                });
-                return clientes;
-            } catch (e) {
-                console.error("Erro ao carregar do Firebase: ", e);
-                return [];
-            }
-        }
-
-        async function atualizarClienteFirebase(id, dados) {
-            try {
-                const clienteRef = window.firestore.doc(window.db, "clientes", id);
-                await window.firestore.updateDoc(clienteRef, dados);
-                console.log("Cliente atualizado no Firebase");
-                return true;
-            } catch (e) {
-                console.error("Erro ao atualizar no Firebase: ", e);
-                return false;
-            }
-        }
-
-        async function excluirClienteFirebase(id) {
-            try {
-                await window.firestore.deleteDoc(
-                    window.firestore.doc(window.db, "clientes", id)
-                );
-                console.log("Cliente excluído do Firebase");
-                return true;
-            } catch (e) {
-                console.error("Erro ao excluir do Firebase: ", e);
-                return false;
-            }
-        }
-
         // Definir a data atual como padrão para o campo de data de cadastro
         document.getElementById('dataCadastro').valueAsDate = new Date();
         
@@ -1249,12 +1190,36 @@
             };
             
             try {
-                await salvarClienteFirebase(cliente);
+                const docRef = await window.firestore.addDoc(
+                    window.firestore.collection(window.db, "clientes"), 
+                    cliente
+                );
+                console.log("Cliente salvo no Firebase com ID: ", docRef.id);
                 const clientes = await carregarClientesFirebase();
                 return clientes.length;
             } catch (e) {
                 console.error("Erro ao salvar cliente: ", e);
                 throw e;
+            }
+        }
+        
+        // Carregar clientes do Firebase
+        async function carregarClientesFirebase() {
+            try {
+                const querySnapshot = await window.firestore.getDocs(
+                    window.firestore.collection(window.db, "clientes")
+                );
+                const clientes = [];
+                querySnapshot.forEach((doc) => {
+                    clientes.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                return clientes;
+            } catch (e) {
+                console.error("Erro ao carregar do Firebase: ", e);
+                return [];
             }
         }
         
@@ -1497,7 +1462,7 @@
             }
         }
         
-        // Dar baixa em um cliente específico
+        // Dar baixa em um cliente específico - FUNÇÃO CORRIGIDA
         async function darBaixaCliente(id) {
             const senha = prompt('Digite a senha de administrador para dar baixa:');
             
@@ -1507,24 +1472,24 @@
             }
             
             try {
-                const sucesso = await atualizarClienteFirebase(id, {
+                // CORREÇÃO: Usar a função correta de atualização
+                const clienteRef = window.firestore.doc(window.db, "clientes", id);
+                await window.firestore.updateDoc(clienteRef, {
                     status: 'Baixada',
                     dataBaixa: new Date().toISOString()
                 });
                 
-                if (sucesso) {
-                    showNotification('Baixa realizada com sucesso!');
-                    carregarHistorico();
-                } else {
-                    showNotification('Erro ao realizar baixa!', false);
-                }
+                showNotification('Baixa realizada com sucesso!');
+                // CORREÇÃO: Recarregar a lista após a baixa
+                await carregarHistorico();
+                
             } catch (e) {
                 console.error("Erro ao dar baixa:", e);
                 showNotification('Erro ao realizar baixa!', false);
             }
         }
         
-        // Excluir um cliente
+        // Excluir um cliente - FUNÇÃO CORRIGIDA
         async function excluirCliente(id) {
             const senha = prompt('Digite a senha de administrador para excluir o cliente:');
             
@@ -1538,21 +1503,22 @@
             }
             
             try {
-                const sucesso = await excluirClienteFirebase(id);
+                // CORREÇÃO: Usar a função correta de exclusão
+                await window.firestore.deleteDoc(
+                    window.firestore.doc(window.db, "clientes", id)
+                );
                 
-                if (sucesso) {
-                    showNotification('Cliente excluído com sucesso!');
-                    carregarHistorico();
-                } else {
-                    showNotification('Erro ao excluir cliente!', false);
-                }
+                showNotification('Cliente excluído com sucesso!');
+                // CORREÇÃO: Recarregar a lista após exclusão
+                await carregarHistorico();
+                
             } catch (e) {
                 console.error("Erro ao excluir cliente:", e);
                 showNotification('Erro ao excluir cliente!', false);
             }
         }
         
-        // Função para editar cliente
+        // Função para editar cliente - FUNÇÃO CORRIGIDA
         async function editarCliente(id) {
             try {
                 const clientes = await carregarClientesFirebase();
@@ -1563,7 +1529,7 @@
                     return;
                 }
                 
-                // Preencher o formulário com os dados do cliente
+                // CORREÇÃO: Preencher corretamente todos os campos
                 document.getElementById('nome').value = cliente.nome || '';
                 document.getElementById('marca').value = cliente.marca || '';
                 document.getElementById('dataNascimento').value = cliente.dataNascimento || '';
@@ -1606,13 +1572,17 @@
             btnSalvar.innerHTML = '<i class="fas fa-save"></i> Salvar Cadastro';
             btnSalvar.removeAttribute('data-editing-id');
             document.getElementById('history-section').classList.add('hidden');
+            
+            // Limpar formulário ao voltar
+            document.getElementById('clientForm').reset();
+            document.getElementById('dataCadastro').valueAsDate = new Date();
         });
         
         // Filtros
         document.getElementById('filter-status').addEventListener('change', carregarHistorico);
         document.getElementById('filter-order').addEventListener('change', carregarHistorico);
         
-        // Manipular o envio do formulário
+        // Manipular o envio do formulário - FUNÇÃO CORRIGIDA
         document.getElementById('clientForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -1654,16 +1624,14 @@
                         timestamp: new Date().toISOString()
                     };
                     
-                    const sucesso = await atualizarClienteFirebase(editingId, clienteAtualizado);
+                    // CORREÇÃO: Usar a função correta de atualização
+                    const clienteRef = window.firestore.doc(window.db, "clientes", editingId);
+                    await window.firestore.updateDoc(clienteRef, clienteAtualizado);
                     
-                    if (sucesso) {
-                        showNotification('Cliente atualizado com sucesso!');
-                        // Resetar o botão para modo normal
-                        btnSalvar.innerHTML = '<i class="fas fa-save"></i> Salvar Cadastro';
-                        btnSalvar.removeAttribute('data-editing-id');
-                    } else {
-                        showNotification('Erro ao atualizar cliente!', false);
-                    }
+                    showNotification('Cliente atualizado com sucesso!');
+                    // Resetar o botão para modo normal
+                    btnSalvar.innerHTML = '<i class="fas fa-save"></i> Salvar Cadastro';
+                    btnSalvar.removeAttribute('data-editing-id');
                 } else {
                     // MODO NOVO CADASTRO
                     const totalClientes = await salvarCliente();
