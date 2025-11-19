@@ -437,13 +437,8 @@
             color: white;
         }
 
-        .btn-baixa-small {
-            background: var(--warning-color);
-            color: white;
-        }
-
-        .btn-excluir-small {
-            background: var(--danger-color);
+        .btn-status-small {
+            background: var(--admin-color);
             color: white;
         }
 
@@ -829,11 +824,6 @@
             <div class="card">
                 <div class="history-header">
                     <h2><i class="fas fa-history"></i> Clientes Cadastrados</h2>
-                    <div class="history-controls">
-                        <button type="button" class="btn-pdf" id="btn-export-all">
-                            <i class="fas fa-file-export"></i> Exportar Tudo
-                        </button>
-                    </div>
                 </div>
                 
                 <div class="filters">
@@ -905,15 +895,24 @@
         </div>
     </footer>
 
-    <!-- Modal para senha de baixa -->
-    <div class="modal" id="modal-baixa">
+    <!-- Modal para atualização de status -->
+    <div class="modal" id="modal-status">
         <div class="modal-content">
-            <h3>Autorização de Baixa</h3>
-            <p>Digite a senha de administrador para dar baixa no cliente:</p>
-            <input type="password" id="senha-baixa" class="modal-input" placeholder="Senha de administrador">
+            <h3>Atualizar Status do Cliente</h3>
+            <p>Digite a senha de administrador para atualizar o status:</p>
+            <input type="password" id="senha-status" class="modal-input" placeholder="Senha de administrador">
+            <div class="form-group">
+                <label for="novo-status">Novo Status:</label>
+                <select id="novo-status" class="modal-input">
+                    <option value="Ativo">Ativo</option>
+                    <option value="Inativo">Inativo</option>
+                    <option value="Bloqueado">Bloqueado</option>
+                    <option value="Cancelado">Cancelado</option>
+                </select>
+            </div>
             <div class="modal-buttons">
-                <button class="modal-btn modal-cancel" id="cancelar-baixa">Cancelar</button>
-                <button class="modal-btn modal-confirm" id="confirmar-baixa">Confirmar</button>
+                <button class="modal-btn modal-cancel" id="cancelar-status">Cancelar</button>
+                <button class="modal-btn modal-confirm" id="confirmar-status">Confirmar</button>
             </div>
         </div>
     </div>
@@ -924,6 +923,9 @@
     </div>
 
     <script>
+        // Variável global para armazenar o ID do cliente sendo atualizado
+        let clienteAtualId = null;
+        
         // Gerar ID aleatório de 4 números e 8 letras
         function gerarIdCliente() {
             const numeros = '0123456789';
@@ -1102,8 +1104,8 @@
                             <button class="action-btn btn-pdf-small" onclick="verCadastroCliente('${cliente.id}')">
                                 <i class="fas fa-eye"></i> Ver
                             </button>
-                            <button class="action-btn btn-baixa-small" onclick="darBaixaCliente('${cliente.id}')">
-                                <i class="fas fa-file-export"></i> Baixa
+                            <button class="action-btn btn-status-small" onclick="abrirModalStatus('${cliente.id}')">
+                                <i class="fas fa-sync-alt"></i> Status
                             </button>
                         </td>
                     `;
@@ -1142,28 +1144,44 @@
             }
         }
         
-        // Dar baixa em um cliente específico
-        async function darBaixaCliente(id) {
-            const senha = prompt('Digite a senha de administrador para dar baixa:');
+        // Abrir modal para atualização de status
+        function abrirModalStatus(id) {
+            clienteAtualId = id;
+            document.getElementById('modal-status').style.display = 'flex';
+            document.getElementById('senha-status').value = '';
+            document.getElementById('senha-status').focus();
+        }
+        
+        // Fechar modal de status
+        document.getElementById('cancelar-status').addEventListener('click', function() {
+            document.getElementById('modal-status').style.display = 'none';
+            clienteAtualId = null;
+        });
+        
+        // Confirmar atualização de status
+        document.getElementById('confirmar-status').addEventListener('click', async function() {
+            const senha = document.getElementById('senha-status').value;
+            const novoStatus = document.getElementById('novo-status').value;
             
             if (senha !== 'CosturADM2023') {
                 showNotification('Senha incorreta!', false);
+                document.getElementById('senha-status').focus();
                 return;
             }
             
-            const novoStatus = prompt('Digite o novo status (Inativo, Bloqueado, Cancelado):');
-            
-            if (!novoStatus || !['Inativo', 'Bloqueado', 'Cancelado'].includes(novoStatus)) {
-                showNotification('Status inválido!', false);
+            if (!clienteAtualId) {
+                showNotification('Erro: ID do cliente não encontrado!', false);
                 return;
             }
             
             try {
-                const clienteRef = window.firebase.doc(window.firebase.db, "clientes", id);
+                const clienteRef = window.firebase.doc(window.firebase.db, "clientes", clienteAtualId);
                 await window.firebase.updateDoc(clienteRef, {
-                    statusCadastro: novoStatus,
-                    dataBaixa: new Date().toISOString()
+                    statusCadastro: novoStatus
                 });
+                
+                document.getElementById('modal-status').style.display = 'none';
+                clienteAtualId = null;
                 
                 carregarHistorico();
                 showNotification('Status atualizado com sucesso!');
@@ -1171,7 +1189,15 @@
                 console.error("Error updating document: ", error);
                 showNotification('Erro ao atualizar status!', false);
             }
-        }
+        });
+        
+        // Fechar modal ao clicar fora
+        window.addEventListener('click', function(e) {
+            if (e.target === document.getElementById('modal-status')) {
+                document.getElementById('modal-status').style.display = 'none';
+                clienteAtualId = null;
+            }
+        });
         
         // Gerar imagem do cadastro (PNG)
         function gerarImagemCadastro(cliente) {
@@ -1361,34 +1387,6 @@
                 carregarHistorico();
             } else {
                 showNotification('Erro ao cadastrar cliente!', false);
-            }
-        });
-        
-        // Exportar todos os clientes
-        document.getElementById('btn-export-all').addEventListener('click', async function() {
-            try {
-                const querySnapshot = await window.firebase.getDocs(window.firebase.collection(window.firebase.db, "clientes"));
-                const clientes = [];
-                
-                querySnapshot.forEach((doc) => {
-                    clientes.push({ id: doc.id, ...doc.data() });
-                });
-                
-                if (clientes.length === 0) {
-                    showNotification('Nenhum cliente para exportar!', false);
-                    return;
-                }
-                
-                // Gerar imagem para cada cliente
-                for (const cliente of clientes) {
-                    await new Promise(resolve => setTimeout(resolve, 100)); // Pequeno delay
-                    gerarImagemCadastro(cliente);
-                }
-                
-                showNotification('Todos os clientes exportados com sucesso!');
-            } catch (error) {
-                console.error("Error exporting documents: ", error);
-                showNotification('Erro ao exportar clientes!', false);
             }
         });
         
