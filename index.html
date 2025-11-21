@@ -63,7 +63,7 @@
             background-color: #f9f9f9;
             color: var(--text);
             line-height: 1.6;
-            min-width: 1200px;
+            /* REMOVIDO: min-width: 1200px; */
         }
 
         .container {
@@ -616,16 +616,264 @@
             display: none;
         }
 
-        /* Responsive adjustments removed for desktop-only */
-        @media (max-width: 768px) {
-            body {
-                min-width: 100%;
+        /* ========== RESPONSIVIDADE ========== */
+
+        /* Tablets e telas menores */
+        @media (max-width: 1024px) {
+            .container {
+                padding: 0 15px;
+            }
+            
+            section {
+                padding: 60px 0;
+            }
+            
+            .hero {
+                padding: 80px 0;
+            }
+            
+            .hero h2 {
+                font-size: 2rem;
+            }
+            
+            .hero p {
+                font-size: 1.1rem;
+            }
+            
+            .section-title h2 {
+                font-size: 1.8rem;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .form-row {
+                flex-wrap: wrap;
+            }
+            
+            .form-group-small,
+            .form-group-medium,
+            .form-group-large {
+                flex: 1 1 100%;
+            }
+            
+            .history-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            .history-table th,
+            .history-table td {
+                padding: 10px;
+            }
+            
+            .action-btn {
+                padding: 6px 10px;
+                font-size: 11px;
             }
         }
 
+        /* Tablets menores e celulares grandes */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .header-contact {
+                align-items: center;
+                margin-top: 10px;
+            }
+            
+            .logo-container {
+                justify-content: center;
+            }
+            
+            .hero {
+                padding: 60px 0;
+            }
+            
+            .hero h2 {
+                font-size: 1.8rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .section-title h2 {
+                font-size: 1.6rem;
+            }
+            
+            .card {
+                padding: 15px;
+            }
+            
+            .history-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .history-controls {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .filters {
+                flex-direction: column;
+            }
+            
+            .filter-select {
+                width: 100%;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            
+            .social-links {
+                justify-content: flex-start;
+            }
+        }
+
+        /* Celulares */
         @media (max-width: 480px) {
-            body {
-                min-width: 100%;
+            .container {
+                padding: 0 10px;
+            }
+            
+            .logo-container {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .logo {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .logo-text h1 {
+                font-size: 1.3rem;
+            }
+            
+            .hero {
+                padding: 40px 0;
+            }
+            
+            .hero h2 {
+                font-size: 1.5rem;
+            }
+            
+            .hero p {
+                font-size: 0.9rem;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+            
+            section {
+                padding: 40px 0;
+            }
+            
+            .section-title {
+                margin-bottom: 30px;
+            }
+            
+            .section-title h2 {
+                font-size: 1.4rem;
+            }
+            
+            .card {
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+            
+            .card h2 {
+                font-size: 1.2rem;
+            }
+            
+            input, select, button, textarea {
+                padding: 10px 12px;
+                font-size: 0.9rem;
+            }
+            
+            .btn-save, .btn-pdf, .btn-history, .btn-baixa {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .form-row {
+                gap: 10px;
+                margin-bottom: 10px;
+            }
+            
+            .history-table th,
+            .history-table td {
+                padding: 8px;
+                font-size: 0.85rem;
+            }
+            
+            .action-btn {
+                padding: 5px 8px;
+                font-size: 10px;
+                margin-bottom: 5px;
+                display: block;
+                width: 100%;
+            }
+            
+            .notification {
+                padding: 10px 15px;
+                right: 10px;
+                top: 10px;
+            }
+            
+            .modal-content {
+                padding: 20px;
+            }
+            
+            .modal h3 {
+                font-size: 1rem;
+            }
+            
+            .modal-input {
+                padding: 10px;
+            }
+            
+            .modal-buttons {
+                flex-direction: column;
+            }
+        }
+
+        /* Telas muito pequenas */
+        @media (max-width: 360px) {
+            .logo-text h1 {
+                font-size: 1.1rem;
+            }
+            
+            .hero h2 {
+                font-size: 1.3rem;
+            }
+            
+            .section-title h2 {
+                font-size: 1.2rem;
+            }
+            
+            .card h2 {
+                font-size: 1.1rem;
+            }
+            
+            .history-table th,
+            .history-table td {
+                padding: 6px;
+                font-size: 0.8rem;
             }
         }
     </style>
