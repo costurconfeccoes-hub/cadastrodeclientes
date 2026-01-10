@@ -1219,21 +1219,59 @@ footer {
             }, 3000);
         }
         
-        // Função para formatar data no formato DD/MM/AAAA
-        function formatarData(data) {
-            if (!data) return 'Não informado';
+        // FUNÇÃO CORRIGIDA: Converter data para formato string sem problemas de fuso horário
+        function converterDataParaString(dataString) {
+            if (!dataString) return '';
             
-            const dataObj = new Date(data);
-            if (isNaN(dataObj.getTime())) return 'Data inválida';
+            // Se já estiver no formato yyyy-mm-dd, retorna como está
+            if (/^\d{4}-\d{2}-\d{2}$/.test(dataString)) {
+                return dataString;
+            }
             
-            const dia = String(dataObj.getDate()).padStart(2, '0');
-            const mes = String(dataObj.getMonth() + 1).padStart(2, '0');
-            const ano = dataObj.getFullYear();
-            
-            return `${dia}/${mes}/${ano}`;
+            try {
+                // Cria a data e extrai os componentes no fuso local
+                const data = new Date(dataString);
+                if (isNaN(data.getTime())) return dataString;
+                
+                // CORREÇÃO DEFINITIVA: Adiciona o offset do fuso horário para compensar a conversão UTC
+                const offset = data.getTimezoneOffset() * 60000; // offset em milissegundos
+                const dataLocal = new Date(data.getTime() - offset);
+                
+                const ano = dataLocal.getFullYear();
+                const mes = String(dataLocal.getMonth() + 1).padStart(2, '0');
+                const dia = String(dataLocal.getDate()).padStart(2, '0');
+                
+                return `${ano}-${mes}-${dia}`;
+            } catch (error) {
+                console.error('Erro ao converter data:', error);
+                return dataString;
+            }
         }
         
-        // Salvar no Firebase
+        // FUNÇÃO CORRIGIDA: Formatar data para exibição DD/MM/AAAA
+        function formatarDataParaExibicao(dataString) {
+            if (!dataString) return 'Não informado';
+            
+            try {
+                // Usa a função de conversão para garantir a data correta
+                const dataConvertida = converterDataParaString(dataString);
+                
+                // Separa os componentes da string yyyy-mm-dd
+                const partes = dataConvertida.split('-');
+                if (partes.length !== 3) return 'Data inválida';
+                
+                const ano = partes[0];
+                const mes = partes[1];
+                const dia = partes[2];
+                
+                return `${dia}/${mes}/${ano}`;
+            } catch (error) {
+                console.error('Erro ao formatar data:', error);
+                return 'Data inválida';
+            }
+        }
+        
+        // Salvar no Firebase - VERSÃO CORRIGIDA
         async function salvarNoFirebase() {
             const cliente = {
                 idCliente: document.getElementById('idCliente').value,
@@ -1308,8 +1346,8 @@ footer {
                 clientesFiltrados.forEach(cliente => {
                     const tr = document.createElement('tr');
                     
-                    // Formatar data no formato DD/MM/AAAA
-                    const dataCadastro = formatarData(cliente.dataCadastro);
+                    // Formatar data usando a função corrigida
+                    const dataCadastro = formatarDataParaExibicao(cliente.dataCadastro);
                     
                     // Determinar classe CSS baseada no status
                     let statusClass = 'status-ativo';
@@ -1423,7 +1461,7 @@ footer {
             }
         });
         
-        // Gerar imagem do cadastro (PNG)
+        // Gerar imagem do cadastro (PNG) - VERSÃO CORRIGIDA
         function gerarImagemCadastro(cliente) {
             // Criar um canvas para gerar a imagem
             const canvas = document.createElement('canvas');
@@ -1481,9 +1519,9 @@ footer {
             y += 25;
             ctx.fillText(`Marca: ${cliente.marca || 'Não informado'}`, 70, y);
             y += 25;
-            ctx.fillText(`Data Nascimento: ${formatarData(cliente.dataNascimento)}`, 70, y);
+            ctx.fillText(`Data Nascimento: ${formatarDataParaExibicao(cliente.dataNascimento)}`, 70, y);
             y += 25;
-            ctx.fillText(`Data Cadastro: ${formatarData(cliente.dataCadastro)}`, 70, y);
+            ctx.fillText(`Data Cadastro: ${formatarDataParaExibicao(cliente.dataCadastro)}`, 70, y);
             y += 25;
             ctx.fillText(`Telefone: ${cliente.telefone}`, 70, y);
             y += 25;
@@ -1621,4 +1659,3 @@ footer {
     </script>
 </body>
 </html>
-
